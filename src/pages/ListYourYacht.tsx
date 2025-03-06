@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/shared/Footer";
@@ -18,11 +17,13 @@ import {
   Clock,
   Star,
   ArrowRight,
-  ChevronLeft
+  Loader2
 } from "lucide-react";
+import { submitYachtListingInterest } from "@/lib/yacht-services";
 
 const ListYourYacht = () => {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -66,15 +67,7 @@ const ListYourYacht = () => {
     });
   };
   
-  const handleSubscribe = () => {
-    toast({
-      title: "Subscription Successful!",
-      description: "Thank you for subscribing to our newsletter.",
-      variant: "default"
-    });
-  };
-  
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Check if required fields are filled
@@ -82,22 +75,38 @@ const ListYourYacht = () => {
     const isFormValid = requiredFields.every(field => formData[field as keyof typeof formData]);
     
     if (isFormValid) {
-      toast({
-        title: "Information Submitted!",
-        description: "We'll contact you soon to complete your yacht listing.",
-        variant: "default"
-      });
-      // Reset form
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        yachtType: "",
-        yachtLength: "",
-        location: "",
-        comments: ""
-      });
+      setLoading(true);
+      
+      try {
+        await submitYachtListingInterest(formData);
+        
+        toast({
+          title: "Information Submitted!",
+          description: "We'll contact you soon to complete your yacht listing.",
+          variant: "default"
+        });
+        
+        // Reset form
+        setFormData({
+          firstName: "",
+          lastName: "",
+          email: "",
+          phone: "",
+          yachtType: "",
+          yachtLength: "",
+          location: "",
+          comments: ""
+        });
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        toast({
+          title: "Submission Failed",
+          description: "There was an error submitting your information. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
     } else {
       toast({
         title: "Please fill all required fields",
@@ -531,43 +540,47 @@ const ListYourYacht = () => {
                 <form className="space-y-4" onSubmit={handleFormSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
+                      <Label htmlFor="firstName">First Name *</Label>
                       <Input 
                         id="firstName" 
                         placeholder="Enter your first name" 
                         value={formData.firstName}
                         onChange={handleInputChange}
+                        required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
+                      <Label htmlFor="lastName">Last Name *</Label>
                       <Input 
                         id="lastName" 
                         placeholder="Enter your last name" 
                         value={formData.lastName}
                         onChange={handleInputChange}
+                        required
                       />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Email *</Label>
                     <Input 
                       id="email" 
                       type="email" 
                       placeholder="Enter your email address" 
                       value={formData.email}
                       onChange={handleInputChange}
+                      required
                     />
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
+                    <Label htmlFor="phone">Phone *</Label>
                     <Input 
                       id="phone" 
                       placeholder="Enter your phone number" 
                       value={formData.phone}
                       onChange={handleInputChange}
+                      required
                     />
                   </div>
                   
@@ -622,8 +635,16 @@ const ListYourYacht = () => {
                   <Button 
                     type="submit" 
                     className="w-full bg-primary hover:bg-primary/90"
+                    disabled={loading}
                   >
-                    Submit Information
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      "Submit Information"
+                    )}
                   </Button>
                   
                   <p className="text-xs text-gray-500 text-center mt-4">

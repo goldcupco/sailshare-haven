@@ -1,78 +1,137 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  SlidersHorizontal, 
-  ChevronDown
-} from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import React, { useState } from "react";
 import YachtTypeFilter from "./YachtTypeFilter";
-import FeatureFilter from "./FeatureFilter";
 import PriceRangeFilter from "./PriceRangeFilter";
+import FeatureFilter from "./FeatureFilter";
+import BookingExperience from "./BookingExperience";
+import { Button } from "@/components/ui/button";
+import { SlidersHorizontal, X } from "lucide-react";
 
 interface SearchFiltersProps {
-  filtersOpen: boolean;
-  toggleFilters: () => void;
+  priceRange: { min: number; max: number };
+  setPriceRange: React.Dispatch<React.SetStateAction<{ min: number; max: number }>>;
   yachtTypes: string[];
+  setYachtTypes: React.Dispatch<React.SetStateAction<string[]>>;
   features: string[];
-  priceRange: { min: number; max: number; };
-  handleYachtTypeChange: (type: string) => void;
-  handleFeatureChange: (feature: string) => void;
-  setPriceRange: React.Dispatch<React.SetStateAction<{ min: number; max: number; }>>;
+  setFeatures: React.Dispatch<React.SetStateAction<string[]>>;
+  instantBookOnly: boolean;
+  setInstantBookOnly: React.Dispatch<React.SetStateAction<boolean>>;
   clearFilters: () => void;
 }
 
 const SearchFilters: React.FC<SearchFiltersProps> = ({
-  filtersOpen,
-  toggleFilters,
-  yachtTypes,
-  features,
   priceRange,
-  handleYachtTypeChange,
-  handleFeatureChange,
   setPriceRange,
+  yachtTypes,
+  setYachtTypes,
+  features,
+  setFeatures,
+  instantBookOnly,
+  setInstantBookOnly,
   clearFilters
 }) => {
-  return (
-    <div className="lg:col-span-1">
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Filters</h2>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={toggleFilters}
-            className="lg:hidden"
-          >
-            <SlidersHorizontal className="h-4 w-4 mr-2" />
-            {filtersOpen ? 'Hide' : 'Show'}
-          </Button>
-        </div>
-        
-        <div className={`space-y-6 ${filtersOpen ? 'block' : 'hidden lg:block'}`}>
-          <PriceRangeFilter 
-            priceRange={priceRange} 
-            setPriceRange={setPriceRange} 
-          />
-          
-          <YachtTypeFilter 
-            yachtTypes={yachtTypes} 
-            handleYachtTypeChange={handleYachtTypeChange} 
-          />
-          
-          <FeatureFilter 
-            features={features} 
-            handleFeatureChange={handleFeatureChange} 
-          />
-          
-          {/* Clear Filters Button */}
-          <Button variant="outline" className="w-full" onClick={clearFilters}>
-            Clear All Filters
-          </Button>
-        </div>
-      </div>
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const hasActiveFilters = () => {
+    return (
+      yachtTypes.length > 0 ||
+      features.length > 0 ||
+      instantBookOnly ||
+      priceRange.min !== 0 ||
+      priceRange.max !== 5000
+    );
+  };
+
+  const activeFilterCount = () => {
+    let count = 0;
+    if (yachtTypes.length > 0) count++;
+    if (features.length > 0) count++;
+    if (instantBookOnly) count++;
+    if (priceRange.min !== 0 || priceRange.max !== 5000) count++;
+    return count;
+  };
+
+  const FiltersComponent = () => (
+    <div className="space-y-6">
+      <YachtTypeFilter
+        selectedTypes={yachtTypes}
+        setSelectedTypes={setYachtTypes}
+      />
+      
+      <PriceRangeFilter
+        priceRange={priceRange}
+        setPriceRange={setPriceRange}
+      />
+      
+      <FeatureFilter
+        selectedFeatures={features}
+        setSelectedFeatures={setFeatures}
+      />
+      
+      <BookingExperience
+        instantBookOnly={instantBookOnly}
+        setInstantBookOnly={setInstantBookOnly}
+      />
+      
+      {hasActiveFilters() && (
+        <Button
+          variant="outline"
+          className="w-full border-dashed"
+          onClick={clearFilters}
+        >
+          <X className="h-4 w-4 mr-2" />
+          Clear all filters
+        </Button>
+      )}
     </div>
+  );
+
+  return (
+    <>
+      {/* Desktop filters */}
+      <div className="hidden lg:block lg:col-span-1">
+        <FiltersComponent />
+      </div>
+
+      {/* Mobile filters toggle */}
+      <div className="lg:hidden mb-4">
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+        >
+          <SlidersHorizontal className="h-4 w-4 mr-2" />
+          Filters {activeFilterCount() > 0 && `(${activeFilterCount()})`}
+        </Button>
+        
+        {/* Mobile filters panel */}
+        {mobileFiltersOpen && (
+          <div className="fixed inset-0 bg-white z-50 overflow-auto p-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Filters</h2>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileFiltersOpen(false)}
+              >
+                <X className="h-6 w-6" />
+              </Button>
+            </div>
+            
+            <FiltersComponent />
+            
+            <div className="mt-6 pt-4 border-t sticky bottom-0 bg-white">
+              <Button
+                className="w-full"
+                onClick={() => setMobileFiltersOpen(false)}
+              >
+                Show {activeFilterCount() > 0 ? "filtered" : "all"} results
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

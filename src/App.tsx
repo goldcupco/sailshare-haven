@@ -12,6 +12,8 @@ import ListYourYacht from "./pages/ListYourYacht";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+import ManageBookings from "./pages/ManageBookings";
+import UserDashboard from "./pages/UserDashboard";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,8 @@ const App = () => (
           <Route path="/list-your-yacht" element={<ListYourYacht />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/bookings" element={<ManageBookings />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,13 +1,24 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { CalendarIcon, Users, MessageSquare, Star } from "lucide-react";
+import { Calendar, User2, MessageSquare, ShieldCheck, Calendar as CalendarIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { createBooking } from "@/lib/booking-services";
+import { useToast } from "@/components/ui/use-toast";
+import { DateRange } from "react-day-picker";
+import { isAuthenticated } from "@/lib/supabase";
+import { useNavigate } from "react-router-dom";
+import { format, addDays, differenceInDays } from "date-fns";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface BookingCardProps {
   price: number;
   instantBook: boolean;
   capacity: number;
+  yachtId: string;
   owner: {
     name: string;
     rating: number;
@@ -22,123 +33,284 @@ const BookingCard = ({
   price,
   instantBook,
   capacity,
+  yachtId,
   owner,
   onBookNow,
   onInstantBook,
-  onContactOwner,
+  onContactOwner
 }: BookingCardProps) => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [guestCount, setGuestCount] = useState(1);
+  const [message, setMessage] = useState("");
+  const [includeCaptain, setIncludeCaptain] = useState(false);
+  const [captainFee, setCaptainFee] = useState(150); // Example fee
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: addDays(new Date(), 3)
+  });
+
+  // Calculate booking details
+  const daysCount = date?.from && date?.to ? differenceInDays(date.to, date.from) + 1 : 0;
+  const subtotal = price * daysCount;
+  const serviceFee = subtotal * 0.1; // 10% service fee
+  const captainTotal = includeCaptain ? captainFee * daysCount : 0;
+  const total = subtotal + serviceFee + captainTotal;
+
+  const handleBookNow = async () => {
+    if (!date?.from || !date?.to) {
+      toast({
+        title: "Please select dates",
+        description: "You must select a start and end date for your booking.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const isLoggedIn = await isAuthenticated();
+    if (!isLoggedIn) {
+      toast({
+        title: "Login Required",
+        description: "You must be logged in to book a yacht.",
+        variant: "destructive"
+      });
+      navigate("/login", { state: { returnTo: window.location.pathname } });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await createBooking({
+        yacht_id: yachtId,
+        start_date: format(date.from, "yyyy-MM-dd"),
+        end_date: format(date.to, "yyyy-MM-dd"),
+        total_price: total,
+        captain_included: includeCaptain,
+        guest_count: guestCount,
+        special_requests: message || undefined
+      });
+
+      onBookNow();
+      
+      toast({
+        title: "Booking Request Sent",
+        description: "The yacht owner will respond to your request soon.",
+      });
+    } catch (error) {
+      console.error("Booking error:", error);
+      toast({
+        title: "Booking Failed",
+        description: "There was an error processing your booking. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInstantBook = async () => {
+    if (!date?.from || !date?.to) {
+      toast({
+        title: "Please select dates",
+        description: "You must select a start and end date for your booking.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const isLoggedIn = await isAuthenticated();
+    if (!isLoggedIn) {
+      toast({
+        title: "Login Required",
+        description: "You must be logged in to book a yacht.",
+        variant: "destructive"
+      });
+      navigate("/login", { state: { returnTo: window.location.pathname } });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await createBooking({
+        yacht_id: yachtId,
+        start_date: format(date.from, "yyyy-MM-dd"),
+        end_date: format(date.to, "yyyy-MM-dd"),
+        total_price: total,
+        captain_included: includeCaptain,
+        guest_count: guestCount,
+        special_requests: message || undefined
+      });
+
+      onInstantBook();
+      
+      toast({
+        title: "Booking Confirmed",
+        description: "Your booking has been confirmed. Check your email for details.",
+      });
+    } catch (error) {
+      console.error("Booking error:", error);
+      toast({
+        title: "Booking Failed",
+        description: "There was an error processing your booking. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Card className="p-6 sticky top-24">
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-6">
+    <div className="sticky top-24 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      <div className="p-6">
+        <div className="flex items-baseline justify-between mb-4">
           <div>
-            <span className="text-2xl font-bold">${price}</span>
-            <span className="text-gray-600"> / day</span>
+            <span className="font-semibold text-2xl">${price}</span>
+            <span className="text-gray-500 ml-1">/ day</span>
           </div>
-          {instantBook && (
-            <div className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full flex items-center">
-              <span>Instant Book</span>
+          <div className="flex items-center text-sm">
+            <span className="text-yellow-500 mr-1">★</span>
+            <span>{owner.rating}</span>
+            <span className="text-gray-400 mx-1">·</span>
+            <span className="text-gray-500">{owner.responseRate}% response</span>
+          </div>
+        </div>
+
+        <div className="space-y-4 mb-6">
+          <div>
+            <Label htmlFor="booking-dates">Booking Dates</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="booking-dates"
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal mt-1.5"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date?.from ? (
+                    date.to ? (
+                      <>
+                        {format(date.from, "LLL dd, y")} -{" "}
+                        {format(date.to, "LLL dd, y")}
+                      </>
+                    ) : (
+                      format(date.from, "LLL dd, y")
+                    )
+                  ) : (
+                    <span>Select your dates</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  initialFocus
+                  mode="range"
+                  defaultMonth={date?.from}
+                  selected={date}
+                  onSelect={setDate}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div>
+            <Label htmlFor="guest-count">Number of Guests</Label>
+            <Input
+              id="guest-count"
+              type="number"
+              min={1}
+              max={capacity}
+              value={guestCount}
+              onChange={(e) => setGuestCount(parseInt(e.target.value))}
+              className="mt-1.5"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Maximum {capacity} guests
+            </p>
+          </div>
+
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="captain-option"
+              checked={includeCaptain}
+              onChange={(e) => setIncludeCaptain(e.target.checked)}
+              className="rounded border-gray-300 text-primary focus:ring-primary"
+            />
+            <Label htmlFor="captain-option" className="ml-2">
+              Include captain (${captainFee}/day)
+            </Label>
+          </div>
+
+          <div>
+            <Label htmlFor="message">Message to Owner (Optional)</Label>
+            <Textarea
+              id="message"
+              placeholder="Introduce yourself and share your plans..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="mt-1.5"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2 text-sm mb-6">
+          <div className="flex justify-between">
+            <span>${price} x {daysCount} days</span>
+            <span>${subtotal}</span>
+          </div>
+          {includeCaptain && (
+            <div className="flex justify-between">
+              <span>Captain fee</span>
+              <span>${captainTotal}</span>
             </div>
           )}
-        </div>
-
-        <div className="border rounded-lg mb-4">
-          <div className="flex">
-            <div className="flex-1 p-3 border-r">
-              <p className="text-sm text-gray-500">Start Date</p>
-              <div className="flex items-center">
-                <CalendarIcon className="h-4 w-4 mr-2 text-gray-600" />
-                <span>Select date</span>
-              </div>
-            </div>
-            <div className="flex-1 p-3">
-              <p className="text-sm text-gray-500">End Date</p>
-              <div className="flex items-center">
-                <CalendarIcon className="h-4 w-4 mr-2 text-gray-600" />
-                <span>Select date</span>
-              </div>
-            </div>
+          <div className="flex justify-between">
+            <span>Service fee</span>
+            <span>${serviceFee.toFixed(2)}</span>
           </div>
-          <div className="p-3 border-t">
-            <p className="text-sm text-gray-500">Guests</p>
-            <div className="flex items-center">
-              <Users className="h-4 w-4 mr-2 text-gray-600" />
-              <span>
-                1 guest{" "}
-                <span className="text-sm text-gray-500">
-                  (max {capacity})
-                </span>
-              </span>
-            </div>
+          <div className="flex justify-between font-semibold pt-2 border-t">
+            <span>Total</span>
+            <span>${total.toFixed(2)}</span>
           </div>
         </div>
 
-        <div className="space-y-3 mb-6">
+        {instantBook ? (
           <Button
-            className="w-full"
-            size="lg"
-            onClick={onBookNow}
+            className="w-full bg-green-600 hover:bg-green-700 mb-3"
+            onClick={handleInstantBook}
+            disabled={loading || !date?.from || !date?.to}
           >
-            Request to Book
+            {loading ? "Processing..." : "Instant Book"}
           </Button>
-          {instantBook && (
-            <Button
-              className="w-full"
-              variant="secondary"
-              size="lg"
-              onClick={onInstantBook}
-            >
-              Instant Book
-            </Button>
-          )}
+        ) : (
           <Button
-            className="w-full"
-            variant="outline"
-            onClick={onContactOwner}
+            className="w-full bg-primary hover:bg-primary/90 mb-3"
+            onClick={handleBookNow}
+            disabled={loading || !date?.from || !date?.to}
           >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Contact Owner
+            {loading ? "Processing..." : "Request to Book"}
           </Button>
-        </div>
+        )}
 
-        <div className="text-sm text-gray-500 text-center">
-          You won't be charged yet
-        </div>
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={onContactOwner}
+        >
+          <MessageSquare className="h-4 w-4 mr-2" />
+          Contact Owner
+        </Button>
       </div>
 
-      <div className="border-t pt-4 mt-4">
-        <div className="flex justify-between mb-2">
-          <span>${price} x 1 day</span>
-          <span>${price}</span>
-        </div>
-        <div className="flex justify-between mb-2">
-          <span>Service fee</span>
-          <span>${Math.round(price * 0.1)}</span>
-        </div>
-        <div className="border-t pt-2 mt-2 flex justify-between font-semibold">
-          <span>Total</span>
-          <span>${price + Math.round(price * 0.1)}</span>
+      <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div className="flex items-center text-sm text-gray-600">
+          <ShieldCheck className="h-4 w-4 mr-2 text-green-600" />
+          <span>Secure payments through our platform</span>
         </div>
       </div>
-
-      <div className="mt-6 bg-ocean-50 rounded-lg p-4">
-        <div className="flex items-center">
-          <div className="w-12 h-12 rounded-full bg-ocean-100 flex items-center justify-center text-ocean-600 font-semibold mr-3">
-            {owner.name.substring(0, 1)}
-          </div>
-          <div>
-            <p className="font-semibold">{owner.name}</p>
-            <div className="flex items-center">
-              <Star className="h-3 w-3 text-yellow-400 mr-1" />
-              <span className="text-sm">
-                {owner.rating} · {owner.responseRate}%
-                response
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
+    </div>
   );
 };
 

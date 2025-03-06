@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/shared/Footer";
 import { useToast } from "@/components/ui/use-toast";
 import { allYachts } from "@/lib/data";
 import { Yacht } from "@/lib/types";
+import { getYachtById } from "@/lib/yacht-services";
+import { Loader2 } from "lucide-react";
 
 // Import refactored components
 import YachtGallery from "@/components/yacht-detail/YachtGallery";
@@ -42,9 +44,66 @@ const sampleReviews = [
 
 const YachtDetail = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const yacht: Yacht | undefined = allYachts.find((y) => y.id === id);
+  const [yacht, setYacht] = useState<Yacht | null>(null);
+  const [loading, setLoading] = useState(true);
   const [favorited, setFavorited] = useState(false);
+
+  useEffect(() => {
+    const loadYacht = async () => {
+      setLoading(true);
+      try {
+        // First try to get from Supabase
+        const supabaseYacht = id ? await getYachtById(id) : null;
+        
+        if (supabaseYacht) {
+          // If found in Supabase, use that
+          if (!supabaseYacht.reviews) {
+            supabaseYacht.reviews = sampleReviews;
+          }
+          
+          // Ensure owner has a rating
+          if (!supabaseYacht.owner.rating) {
+            supabaseYacht.owner.rating = 4.9;
+          }
+          
+          setYacht(supabaseYacht);
+        } else {
+          // Fall back to mock data
+          const mockYacht = allYachts.find((y) => y.id === id);
+          
+          if (mockYacht) {
+            if (!mockYacht.reviews) {
+              mockYacht.reviews = sampleReviews;
+            }
+            
+            mockYacht.price = mockYacht.pricePerDay;
+            
+            // Ensure owner has a rating
+            if (!mockYacht.owner.rating) {
+              mockYacht.owner.rating = 4.9;
+            }
+            
+            setYacht(mockYacht);
+          } else {
+            setYacht(null);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching yacht:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load yacht details. Please try again.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadYacht();
+  }, [id, toast]);
 
   useEffect(() => {
     const favoritesStr = localStorage.getItem("favorites");
@@ -53,6 +112,21 @@ const YachtDetail = () => {
       setFavorited(favorites.some((fav: any) => fav.id === yacht.id));
     }
   }, [yacht]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 container max-w-6xl mx-auto px-4 py-24 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <p className="text-gray-600">Loading yacht details...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!yacht) {
     return (
@@ -66,20 +140,9 @@ const YachtDetail = () => {
     );
   }
 
-  if (!yacht.reviews) {
-    yacht.reviews = sampleReviews;
-  }
-  
-  yacht.price = yacht.pricePerDay;
-  
-  // Ensure owner has a rating - provide a default if missing
-  if (!yacht.owner.rating) {
-    yacht.owner.rating = 4.9;
-  }
-
   const handleBookNow = () => {
     toast({
-      title: "Booking Initiated",
+      title: "Booking Requested",
       description: "Your request has been sent to the yacht owner.",
     });
   };
@@ -92,6 +155,7 @@ const YachtDetail = () => {
         title: "Login Required",
         description: "Please log in to save favorites.",
       });
+      navigate("/login", { state: { returnTo: window.location.pathname } });
       return;
     }
     
@@ -189,12 +253,13 @@ const YachtDetail = () => {
 
             <div className="lg:col-span-1">
               <BookingCard 
-                price={yacht.price}
+                price={yacht.pricePerDay}
                 instantBook={yacht.instantBook}
                 capacity={yacht.capacity}
+                yachtId={yacht.id}
                 owner={{
                   name: yacht.owner.name,
-                  rating: yacht.owner.rating,
+                  rating: yacht.owner.rating || 4.9,
                   responseRate: yacht.owner.responseRate
                 }}
                 onBookNow={handleBookNow}
