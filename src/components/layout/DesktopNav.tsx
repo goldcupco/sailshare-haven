@@ -14,10 +14,40 @@ interface DesktopNavProps {
 
 export const DesktopNav = ({ isScrolled, isHomePage }: DesktopNavProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    // Check local storage for login state
     return localStorage.getItem("isLoggedIn") === "true";
   });
+  const [favorites, setFavorites] = useState(() => {
+    return JSON.parse(localStorage.getItem("favorites") || "[]").length;
+  });
   const { toast } = useToast();
+
+  const handleFavorites = () => {
+    if (!isLoggedIn) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to access your favorites.",
+      });
+      return;
+    }
+    toast({
+      title: "Favorites",
+      description: "View your favorite yachts and saved searches.",
+    });
+  };
+
+  const handleMessages = () => {
+    if (!isLoggedIn) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to access your messages.",
+      });
+      return;
+    }
+    toast({
+      title: "Messages",
+      description: "Access your conversations with yacht owners and charter services.",
+    });
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
@@ -65,17 +95,24 @@ export const DesktopNav = ({ isScrolled, isHomePage }: DesktopNavProps) => {
         <Button
           variant="ghost"
           size="icon"
+          onClick={handleFavorites}
           className={cn(
-            "transition-colors",
+            "transition-colors relative",
             isScrolled || !isHomePage ? "text-gray-700 hover:text-primary" : "text-white/90 hover:text-white"
           )}
         >
           <Heart className="h-5 w-5" />
+          {favorites > 0 && (
+            <span className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              {favorites}
+            </span>
+          )}
         </Button>
         
         <Button
           variant="ghost"
           size="icon"
+          onClick={handleMessages}
           className={cn(
             "transition-colors",
             isScrolled || !isHomePage ? "text-gray-700 hover:text-primary" : "text-white/90 hover:text-white"
