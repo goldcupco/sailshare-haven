@@ -1,10 +1,10 @@
-
 import { Link } from "react-router-dom";
 import { Heart, LogIn, LogOut, MessageCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DestinationsDropdown } from "./DestinationsDropdown";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 
 interface DesktopNavProps {
@@ -21,20 +21,24 @@ export const DesktopNav = ({ isScrolled, isHomePage }: DesktopNavProps) => {
   });
   const [showFavoritesModal, setShowFavoritesModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
+  const [favoriteYachts, setFavoriteYachts] = useState(() => {
+    const favoritesStr = localStorage.getItem("favorites");
+    return favoritesStr ? JSON.parse(favoritesStr) : [];
+  });
   const { toast } = useToast();
 
-  // Listen for changes to favorites in localStorage
+  const navigate = useNavigate();
+
   useEffect(() => {
     const handleStorageChange = () => {
-      const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
+      const favoritesStr = localStorage.getItem("favorites");
+      const favs = favoritesStr ? JSON.parse(favoritesStr) : [];
+      setFavoriteYachts(favs);
       setFavorites(favs.length);
     };
 
     window.addEventListener("storage", handleStorageChange);
-    
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const handleFavorites = () => {
@@ -46,18 +50,15 @@ export const DesktopNav = ({ isScrolled, isHomePage }: DesktopNavProps) => {
       return;
     }
     
-    // Toggle favorites modal
     setShowFavoritesModal(!showFavoritesModal);
     
     if (!showFavoritesModal) {
-      // Only show toast when opening
       toast({
         title: "Favorites",
         description: "View your favorite yachts and saved searches.",
       });
     }
     
-    // For demo purposes, we'll add a fake favorite if there are none
     if (favorites === 0) {
       const fakeFavorites = [{ id: 1, name: "Ocean Explorer" }];
       localStorage.setItem("favorites", JSON.stringify(fakeFavorites));
@@ -74,11 +75,9 @@ export const DesktopNav = ({ isScrolled, isHomePage }: DesktopNavProps) => {
       return;
     }
     
-    // Toggle chat modal
     setShowChatModal(!showChatModal);
     
     if (!showChatModal) {
-      // Only show toast when opening
       toast({
         title: "Messages",
         description: "Access your conversations with yacht owners and charter services.",
@@ -93,6 +92,11 @@ export const DesktopNav = ({ isScrolled, isHomePage }: DesktopNavProps) => {
       title: "Logged out successfully",
       description: "You have been logged out of your account.",
     });
+  };
+
+  const handleViewYacht = (id: number) => {
+    setShowFavoritesModal(false);
+    navigate(`/yacht/${id}`);
   };
 
   return (
@@ -203,23 +207,34 @@ export const DesktopNav = ({ isScrolled, isHomePage }: DesktopNavProps) => {
               <h2 className="text-xl font-semibold">Your Favorites</h2>
               <Button variant="ghost" size="sm" onClick={() => setShowFavoritesModal(false)}>✕</Button>
             </div>
-            <div className="space-y-4">
-              {favorites > 0 ? (
-                <div className="border rounded-md p-3 flex items-center">
-                  <div>
-                    <h3 className="font-medium">Ocean Explorer</h3>
-                    <p className="text-sm text-gray-500">42ft • Miami, FL</p>
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+              {favoriteYachts.length > 0 ? (
+                favoriteYachts.map((yacht: any) => (
+                  <div key={yacht.id} className="border rounded-md p-3 flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">{yacht.name}</h3>
+                      <p className="text-sm text-gray-500">{yacht.location}</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewYacht(yacht.id)}
+                    >
+                      View Details
+                    </Button>
                   </div>
-                  <Button variant="outline" size="sm" className="ml-auto">
-                    View Details
-                  </Button>
-                </div>
+                ))
               ) : (
                 <p className="text-center py-8 text-gray-500">You have no favorites yet.</p>
               )}
             </div>
             <div className="mt-4 pt-4 border-t">
-              <Button className="w-full">Browse More Yachts</Button>
+              <Button className="w-full" onClick={() => {
+                setShowFavoritesModal(false);
+                navigate('/search');
+              }}>
+                Browse More Yachts
+              </Button>
             </div>
           </div>
         </div>
