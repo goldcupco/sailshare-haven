@@ -72,6 +72,7 @@ const YachtDetail = () => {
   
   yacht.price = yacht.pricePerDay;
   
+  // Ensure owner has a rating - provide a default if missing
   if (!yacht.owner.rating) {
     yacht.owner.rating = 4.9;
   }
@@ -191,7 +192,11 @@ const YachtDetail = () => {
                 price={yacht.price}
                 instantBook={yacht.instantBook}
                 capacity={yacht.capacity}
-                owner={yacht.owner}
+                owner={{
+                  name: yacht.owner.name,
+                  rating: yacht.owner.rating,
+                  responseRate: yacht.owner.responseRate
+                }}
                 onBookNow={handleBookNow}
                 onInstantBook={handleInstantBook}
                 onContactOwner={handleContactOwner}
