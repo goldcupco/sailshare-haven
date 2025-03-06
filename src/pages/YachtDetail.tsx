@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/shared/Footer";
@@ -29,7 +28,6 @@ import {
   RulerIcon
 } from "lucide-react";
 
-// Sample reviews data
 const sampleReviews = [
   {
     user: "John D.",
@@ -55,6 +53,15 @@ const YachtDetail = () => {
   const { toast } = useToast();
   const { id } = useParams<{ id: string }>();
   const yacht: Yacht | undefined = allYachts.find((y) => y.id === id);
+  const [favorited, setFavorited] = useState(false);
+
+  useEffect(() => {
+    const favoritesStr = localStorage.getItem("favorites");
+    if (favoritesStr && yacht) {
+      const favorites = JSON.parse(favoritesStr);
+      setFavorited(favorites.some((fav: any) => fav.id === yacht.id));
+    }
+  }, [yacht]);
 
   if (!yacht) {
     return (
@@ -76,15 +83,12 @@ const YachtDetail = () => {
     );
   }
 
-  // Add reviews if they don't exist
   if (!yacht.reviews) {
     yacht.reviews = sampleReviews;
   }
   
-  // Map pricePerDay to price for compatibility
   yacht.price = yacht.pricePerDay;
   
-  // Add owner rating if it doesn't exist
   if (!yacht.owner.rating) {
     yacht.owner.rating = 4.9;
   }
@@ -97,10 +101,45 @@ const YachtDetail = () => {
   };
 
   const handleSaveToFavorites = () => {
-    toast({
-      title: "Added to Favorites",
-      description: "This yacht has been added to your favorites.",
-    });
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    
+    if (!isLoggedIn) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to save favorites.",
+      });
+      return;
+    }
+    
+    const newFavoritedState = !favorited;
+    setFavorited(newFavoritedState);
+    
+    const favoritesStr = localStorage.getItem("favorites");
+    let favorites = favoritesStr ? JSON.parse(favoritesStr) : [];
+    
+    if (newFavoritedState) {
+      if (!favorites.some((fav: any) => fav.id === yacht.id)) {
+        favorites.push({ 
+          id: yacht.id, 
+          name: yacht.name,
+          location: `${yacht.location.city}, ${yacht.location.state}`
+        });
+      }
+      toast({
+        title: "Added to Favorites",
+        description: `${yacht.name} has been added to your favorites.`
+      });
+    } else {
+      favorites = favorites.filter((fav: any) => fav.id !== yacht.id);
+      toast({
+        title: "Removed from Favorites",
+        description: `${yacht.name} has been removed from your favorites.`
+      });
+    }
+    
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+    
+    window.dispatchEvent(new Event('storage'));
   };
 
   const handleShareYacht = () => {
@@ -129,7 +168,6 @@ const YachtDetail = () => {
       <Navbar />
 
       <main className="flex-1 pt-20">
-        {/* Breadcrumb navigation */}
         <div className="container max-w-7xl mx-auto px-4 py-4">
           <Link
             to="/search"
@@ -139,7 +177,6 @@ const YachtDetail = () => {
             Back to search results
           </Link>
 
-          {/* Yacht Images */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <div className="rounded-xl overflow-hidden h-[400px]">
               <img
@@ -171,7 +208,6 @@ const YachtDetail = () => {
             </div>
           </div>
 
-          {/* Yacht Details */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
             <div className="lg:col-span-2">
               <div className="flex flex-wrap items-center justify-between mb-6">
@@ -180,11 +216,11 @@ const YachtDetail = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex items-center"
+                    className={`flex items-center ${favorited ? 'bg-pink-50' : ''}`}
                     onClick={handleSaveToFavorites}
                   >
-                    <Heart className="h-4 w-4 mr-2" />
-                    Save
+                    <Heart className={`h-4 w-4 mr-2 ${favorited ? 'fill-red-500 text-red-500' : ''}`} />
+                    {favorited ? 'Saved' : 'Save'}
                   </Button>
                   <Button
                     variant="outline"
@@ -508,7 +544,6 @@ const YachtDetail = () => {
             </div>
           </div>
 
-          {/* Similar Yachts */}
           <div className="mb-12">
             <h2 className="text-2xl font-semibold mb-6">
               Similar Yachts You May Like
