@@ -9,6 +9,8 @@ import Search from "./pages/Search";
 import YachtDetail from "./pages/YachtDetail";
 import HowItWorks from "./pages/HowItWorks";
 import ListYourYacht from "./pages/ListYourYacht";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/yacht/:id" element={<YachtDetail />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/list-your-yacht" element={<ListYourYacht />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

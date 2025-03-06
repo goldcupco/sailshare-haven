@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Sailboat, Menu, X, ChevronDown, User, LogIn, Search, Heart, MessageCircle } from "lucide-react";
@@ -243,14 +244,18 @@ const Navbar = () => {
                   </nav>
                   
                   <div className="mt-8 space-y-3">
-                    <Button className="w-full" variant="outline">
-                      <LogIn className="h-5 w-5 mr-2" />
-                      Log In
-                    </Button>
-                    <Button className="w-full bg-primary hover:bg-primary/90">
-                      <User className="h-5 w-5 mr-2" />
-                      Sign Up
-                    </Button>
+                    <Link to="/login" className="w-full">
+                      <Button className="w-full" variant="outline">
+                        <LogIn className="h-5 w-5 mr-2" />
+                        Log In
+                      </Button>
+                    </Link>
+                    <Link to="/signup" className="w-full">
+                      <Button className="w-full bg-primary hover:bg-primary/90">
+                        <User className="h-5 w-5 mr-2" />
+                        Sign Up
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </SheetContent>
