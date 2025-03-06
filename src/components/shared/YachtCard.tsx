@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Rating } from "@/components/ui/rating";
 import { Heart, MapPin, Users, Ruler, Sailboat, Calendar } from "lucide-react";
 import { Yacht } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/use-toast";
 
 interface YachtCardProps {
   yacht: Yacht;
@@ -18,11 +19,63 @@ interface YachtCardProps {
 const YachtCard = ({ yacht, className, size = "md" }: YachtCardProps) => {
   const [favorited, setFavorited] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { toast } = useToast();
+  
+  useEffect(() => {
+    // Check if yacht is in favorites
+    const favoritesStr = localStorage.getItem("favorites");
+    if (favoritesStr) {
+      const favorites = JSON.parse(favoritesStr);
+      setFavorited(favorites.some((fav: any) => fav.id === yacht.id));
+    }
+  }, [yacht.id]);
   
   const toggleFavorite = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setFavorited(!favorited);
+    
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    if (!isLoggedIn) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to save favorites.",
+      });
+      return;
+    }
+    
+    const newFavoritedState = !favorited;
+    setFavorited(newFavoritedState);
+    
+    // Update localStorage
+    const favoritesStr = localStorage.getItem("favorites");
+    let favorites = favoritesStr ? JSON.parse(favoritesStr) : [];
+    
+    if (newFavoritedState) {
+      // Add to favorites if not already there
+      if (!favorites.some((fav: any) => fav.id === yacht.id)) {
+        favorites.push({ 
+          id: yacht.id, 
+          name: yacht.name,
+          location: yacht.location
+        });
+      }
+      toast({
+        title: "Added to Favorites",
+        description: `${yacht.name} has been added to your favorites.`
+      });
+    } else {
+      // Remove from favorites
+      favorites = favorites.filter((fav: any) => fav.id !== yacht.id);
+      toast({
+        title: "Removed from Favorites",
+        description: `${yacht.name} has been removed from your favorites.`
+      });
+    }
+    
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+    
+    // Trigger storage event for other components to update
+    window.dispatchEvent(new Event('storage'));
   };
 
   const sizeClasses = {
