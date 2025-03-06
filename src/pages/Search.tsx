@@ -6,6 +6,7 @@ import Footer from "@/components/shared/Footer";
 import YachtCard from "@/components/shared/YachtCard";
 import SearchBar from "@/components/shared/SearchBar";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Yacht } from "@/lib/types";
 import { featuredYachts } from "@/lib/data";
 import { 
@@ -14,17 +15,38 @@ import {
   ChevronDown, 
   BadgeCheck 
 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Search = () => {
-  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [yachts, setYachts] = useState<Yacht[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  
+  // Add state for filters
+  const [yachtTypes, setYachtTypes] = useState<string[]>([]);
+  const [features, setFeatures] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState({ min: 100, max: 10000 });
 
   const locationParam = searchParams.get("location");
   const startDateParam = searchParams.get("startDate");
   const endDateParam = searchParams.get("endDate");
   const guestsParam = searchParams.get("guests");
+
+  // Initialize filters from URL params
+  useEffect(() => {
+    const typesParam = searchParams.get("types");
+    const featuresParam = searchParams.get("features");
+    
+    if (typesParam) {
+      setYachtTypes(typesParam.split(','));
+    }
+    
+    if (featuresParam) {
+      setFeatures(featuresParam.split(','));
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     // Simulate API fetch with a delay
@@ -46,15 +68,93 @@ const Search = () => {
         filteredYachts = filteredYachts.filter(yacht => yacht.capacity >= guestCount);
       }
       
+      // Filter by yacht types
+      if (yachtTypes.length > 0) {
+        filteredYachts = filteredYachts.filter(yacht => 
+          yachtTypes.includes(yacht.type)
+        );
+      }
+      
+      // Filter by features/amenities
+      if (features.length > 0) {
+        filteredYachts = filteredYachts.filter(yacht => 
+          features.every(feature => {
+            // Handle special cases for features that aren't directly in amenities
+            if (feature === 'Captain Included') {
+              return yacht.captain?.included;
+            } else if (feature === 'Instant Book') {
+              return yacht.instantBook;
+            } else {
+              return yacht.amenities.includes(feature);
+            }
+          })
+        );
+      }
+      
       setYachts(filteredYachts);
       setLoading(false);
     }, 800);
     
     return () => clearTimeout(timer);
-  }, [locationParam, startDateParam, endDateParam, guestsParam]);
+  }, [locationParam, startDateParam, endDateParam, guestsParam, yachtTypes, features]);
 
   const toggleFilters = () => {
     setFiltersOpen(!filtersOpen);
+  };
+
+  const handleYachtTypeChange = (type: string) => {
+    setYachtTypes(prev => {
+      let newTypes;
+      if (prev.includes(type)) {
+        newTypes = prev.filter(t => t !== type);
+      } else {
+        newTypes = [...prev, type];
+      }
+      
+      // Update URL parameters
+      updateSearchParams("types", newTypes.join(','));
+      return newTypes;
+    });
+  };
+
+  const handleFeatureChange = (feature: string) => {
+    setFeatures(prev => {
+      let newFeatures;
+      if (prev.includes(feature)) {
+        newFeatures = prev.filter(f => f !== feature);
+      } else {
+        newFeatures = [...prev, feature];
+      }
+      
+      // Update URL parameters
+      updateSearchParams("features", newFeatures.join(','));
+      return newFeatures;
+    });
+  };
+
+  const updateSearchParams = (param: string, value: string) => {
+    if (value) {
+      searchParams.set(param, value);
+    } else {
+      searchParams.delete(param);
+    }
+    setSearchParams(searchParams);
+  };
+
+  const clearFilters = () => {
+    setYachtTypes([]);
+    setFeatures([]);
+    setPriceRange({ min: 100, max: 10000 });
+    
+    // Remove filter parameters from URL
+    searchParams.delete("types");
+    searchParams.delete("features");
+    setSearchParams(searchParams);
+    
+    toast({
+      title: "Filters cleared",
+      description: "All search filters have been reset",
+    });
   };
 
   return (
@@ -105,8 +205,8 @@ const Search = () => {
                     </h3>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Min: $100</span>
-                        <span className="text-sm text-gray-600">Max: $10,000</span>
+                        <span className="text-sm text-gray-600">Min: ${priceRange.min}</span>
+                        <span className="text-sm text-gray-600">Max: ${priceRange.max}</span>
                       </div>
                       {/* Simple price range slider placeholder */}
                       <div className="h-2 bg-gray-200 rounded-full">
@@ -124,12 +224,13 @@ const Search = () => {
                     <div className="space-y-2">
                       {['Motor Yacht', 'Sailing Yacht', 'Catamaran', 'Superyacht'].map(type => (
                         <div key={type} className="flex items-center">
-                          <input 
-                            type="checkbox" 
-                            id={type} 
+                          <Checkbox 
+                            id={type}
+                            checked={yachtTypes.includes(type)}
+                            onCheckedChange={() => handleYachtTypeChange(type)}
                             className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                           />
-                          <label htmlFor={type} className="ml-2 text-sm text-gray-700">
+                          <label htmlFor={type} className="ml-2 text-sm text-gray-700 cursor-pointer">
                             {type}
                           </label>
                         </div>
@@ -146,12 +247,13 @@ const Search = () => {
                     <div className="space-y-2">
                       {['Captain Included', 'Instant Book', 'WiFi', 'Air Conditioning'].map(feature => (
                         <div key={feature} className="flex items-center">
-                          <input 
-                            type="checkbox" 
-                            id={feature} 
+                          <Checkbox
+                            id={feature}
+                            checked={features.includes(feature)}
+                            onCheckedChange={() => handleFeatureChange(feature)}
                             className="h-4 w-4 text-primary rounded border-gray-300 focus:ring-primary"
                           />
-                          <label htmlFor={feature} className="ml-2 text-sm text-gray-700">
+                          <label htmlFor={feature} className="ml-2 text-sm text-gray-700 cursor-pointer">
                             {feature}
                           </label>
                         </div>
@@ -160,7 +262,7 @@ const Search = () => {
                   </div>
                   
                   {/* Clear Filters Button */}
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full" onClick={clearFilters}>
                     Clear All Filters
                   </Button>
                 </div>
@@ -188,7 +290,7 @@ const Search = () => {
                   <p className="text-gray-600 mb-6">
                     Try adjusting your search filters or exploring different locations
                   </p>
-                  <Button>
+                  <Button onClick={clearFilters}>
                     Reset Filters
                   </Button>
                 </div>
