@@ -54,8 +54,15 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
   const FiltersComponent = () => (
     <div className="space-y-6">
       <YachtTypeFilter
-        selectedTypes={yachtTypes}
-        setSelectedTypes={setYachtTypes}
+        yachtTypes={yachtTypes}
+        handleYachtTypeChange={(type) => {
+          const index = yachtTypes.indexOf(type);
+          if (index === -1) {
+            setYachtTypes([...yachtTypes, type]);
+          } else {
+            setYachtTypes(yachtTypes.filter(t => t !== type));
+          }
+        }}
       />
       
       <PriceRangeFilter
@@ -64,8 +71,15 @@ const SearchFilters: React.FC<SearchFiltersProps> = ({
       />
       
       <FeatureFilter
-        selectedFeatures={features}
-        setSelectedFeatures={setFeatures}
+        features={features}
+        handleFeatureChange={(feature) => {
+          const index = features.indexOf(feature);
+          if (index === -1) {
+            setFeatures([...features, feature]);
+          } else {
+            setFeatures(features.filter(f => f !== feature));
+          }
+        }}
       />
       
       <BookingExperience

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Calendar, CheckCircle, XCircle, Clock, MessageSquare } from "lucide-react";
+import { Loader2, Calendar, CheckCircle, XCircle, Clock, MessageSquare, Users } from "lucide-react";
 import { getUserBookings, getOwnerBookings, cancelBooking, updateBookingStatus } from "@/lib/booking-services";
 import { isAuthenticated } from "@/lib/supabase";
 import { format, parseISO } from "date-fns";
