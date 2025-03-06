@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Sailboat, Menu, X, ChevronDown, User, LogIn, Search, Heart, MessageCircle } from "lucide-react";
@@ -14,7 +13,6 @@ const Navbar = () => {
   const [showSearch, setShowSearch] = useState(false);
   const isHomePage = location.pathname === "/";
 
-  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
@@ -24,7 +22,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Toggle search bar on smaller screens
   const toggleSearch = () => {
     setShowSearch(!showSearch);
   };
@@ -40,7 +37,6 @@ const Navbar = () => {
     >
       <div className="container px-4 md:px-6">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <Link 
             to="/" 
             className="flex items-center space-x-2"
@@ -61,7 +57,6 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             <Link 
               to="/search" 
@@ -109,7 +104,7 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
             <Link 
-              to="#" 
+              to="/how-it-works" 
               className={cn(
                 "px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 isScrolled || !isHomePage ? "text-gray-700 hover:text-primary" : "text-white/90 hover:text-white"
@@ -118,7 +113,7 @@ const Navbar = () => {
               How It Works
             </Link>
             <Link 
-              to="#" 
+              to="/list-your-yacht" 
               className={cn(
                 "px-3 py-2 rounded-md text-sm font-medium transition-colors",
                 isScrolled || !isHomePage ? "text-gray-700 hover:text-primary" : "text-white/90 hover:text-white"
@@ -128,7 +123,6 @@ const Navbar = () => {
             </Link>
           </nav>
 
-          {/* Action Buttons */}
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
@@ -184,7 +178,6 @@ const Navbar = () => {
               Sign Up
             </Button>
 
-            {/* Mobile Menu */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button
@@ -233,10 +226,10 @@ const Navbar = () => {
                         </Link>
                       </div>
                     </div>
-                    <Link to="#" className="py-2 text-gray-700 hover:text-primary transition-colors">
+                    <Link to="/how-it-works" className="py-2 text-gray-700 hover:text-primary transition-colors">
                       How It Works
                     </Link>
-                    <Link to="#" className="py-2 text-gray-700 hover:text-primary transition-colors">
+                    <Link to="/list-your-yacht" className="py-2 text-gray-700 hover:text-primary transition-colors">
                       List Your Yacht
                     </Link>
                     <Link to="#" className="py-2 text-gray-700 hover:text-primary transition-colors">
@@ -265,7 +258,6 @@ const Navbar = () => {
           </div>
         </div>
         
-        {/* Mobile Search Bar */}
         {showSearch && (
           <div className="md:hidden mt-4 animate-fade-in">
             <SearchBar variant="compact" />

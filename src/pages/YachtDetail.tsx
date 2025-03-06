@@ -1,10 +1,12 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/shared/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { Rating } from "@/components/ui/rating";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -13,23 +15,10 @@ import { featuredYachts } from "@/lib/data";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  CalendarIcon,
-  Map,
-  Anchor,
-  Sailboat,
-  Users,
-  Ruler,
-  Home,
-  Shield,
-  Check, 
-  Info,
-  ChevronLeft,
-  Heart,
-  Share2
-} from "lucide-react";
+import { CalendarIcon, MapPin, Users, Anchor, Shield, CheckCircle, LifeBuoy, ShowerHead, Utensils, Wifi, Music, ArrowRight, MessageSquare, Heart, Share, Sun, Sailboat } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import YachtCard from "@/components/shared/YachtCard";
 
 const YachtDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -42,7 +31,6 @@ const YachtDetail = () => {
   const [includeCaptain, setIncludeCaptain] = useState<boolean>(false);
   const { toast } = useToast();
 
-  // Calculate rental days and total
   const rentalDays = startDate && endDate 
     ? Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) 
     : 0;
@@ -55,7 +43,6 @@ const YachtDetail = () => {
   const total = subtotal + captainFee + serviceFee;
 
   useEffect(() => {
-    // Simulate API fetch
     setLoading(true);
     const timer = setTimeout(() => {
       const yachtData = featuredYachts.find(y => y.id === id);
@@ -63,7 +50,6 @@ const YachtDetail = () => {
         setYacht(yachtData);
         setSelectedImage(yachtData.imageUrl);
         
-        // Set default captain option
         if (yachtData.captain.included) {
           setIncludeCaptain(true);
         }
@@ -153,7 +139,6 @@ const YachtDetail = () => {
       
       <main className="flex-1 pt-24 pb-16">
         <div className="container px-4 md:px-6">
-          {/* Breadcrumbs */}
           <div className="mb-4 flex items-center text-sm">
             <Link to="/" className="text-gray-500 hover:text-primary">Home</Link>
             <span className="mx-2 text-gray-400">/</span>
@@ -162,7 +147,6 @@ const YachtDetail = () => {
             <span className="text-gray-900 font-medium">{yacht.name}</span>
           </div>
           
-          {/* Yacht Name and Quick Info */}
           <div className="mb-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <h1 className="text-2xl md:text-3xl font-bold">{yacht.name}</h1>
@@ -172,7 +156,7 @@ const YachtDetail = () => {
                   Save
                 </Button>
                 <Button variant="outline" size="sm" className="gap-1">
-                  <Share2 className="h-4 w-4" />
+                  <Share className="h-4 w-4" />
                   Share
                 </Button>
               </div>
@@ -182,13 +166,12 @@ const YachtDetail = () => {
               <span className="ml-2 text-gray-600">({yacht.reviewCount} reviews)</span>
               <span className="mx-2 text-gray-400">•</span>
               <span className="text-gray-600">
-                <Map className="inline-block h-3.5 w-3.5 mr-1" />
+                <MapPin className="inline-block h-3.5 w-3.5 mr-1" />
                 {yacht.location.city}, {yacht.location.state}
               </span>
             </div>
           </div>
           
-          {/* Image Gallery */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8">
             <div className="md:col-span-8">
               <div className="relative rounded-xl overflow-hidden bg-gray-100 h-[400px] md:h-[500px]">
@@ -221,9 +204,7 @@ const YachtDetail = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Left Column - Yacht Details */}
             <div className="md:col-span-2">
-              {/* Description & Host */}
               <div className="mb-8">
                 <div className="flex justify-between items-start">
                   <div>
@@ -270,7 +251,6 @@ const YachtDetail = () => {
                 
                 <Separator className="my-6" />
                 
-                {/* Captain Information */}
                 <div className="mb-6">
                   <h3 className="text-lg font-semibold mb-3 flex items-center">
                     <Anchor className="mr-2 h-5 w-5 text-primary" />
@@ -308,13 +288,12 @@ const YachtDetail = () => {
                   </div>
                 </div>
                 
-                {/* Amenities */}
                 <div>
                   <h3 className="text-lg font-semibold mb-3">Amenities</h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3">
                     {yacht.amenities.map((amenity, index) => (
                       <div key={index} className="flex items-center">
-                        <Check className="h-4 w-4 text-primary mr-2" />
+                        <CheckCircle className="h-4 w-4 text-primary mr-2" />
                         <span className="text-gray-700">{amenity}</span>
                       </div>
                     ))}
@@ -322,13 +301,11 @@ const YachtDetail = () => {
                 </div>
               </div>
               
-              {/* Location */}
               <div className="mb-8">
                 <h3 className="text-lg font-semibold mb-3">Location</h3>
                 <div className="rounded-lg overflow-hidden h-64 mb-2 bg-gray-100">
-                  {/* Map placeholder - would be replaced with actual map component */}
                   <div className="w-full h-full flex items-center justify-center bg-ocean-100">
-                    <Map className="h-8 w-8 text-ocean-900" />
+                    <MapPin className="h-8 w-8 text-ocean-900" />
                     <span className="ml-2 font-medium text-ocean-900">Map View</span>
                   </div>
                 </div>
@@ -338,7 +315,6 @@ const YachtDetail = () => {
               </div>
             </div>
             
-            {/* Right Column - Booking Form */}
             <div className="md:col-span-1">
               <Card className="sticky top-28">
                 <CardContent className="p-6">
@@ -356,7 +332,6 @@ const YachtDetail = () => {
                   </div>
                   
                   <div className="space-y-4">
-                    {/* Date Selection */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Start Date</label>
@@ -418,7 +393,6 @@ const YachtDetail = () => {
                       </div>
                     </div>
                     
-                    {/* Guests */}
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Guests</label>
                       <Select value={guests} onValueChange={setGuests}>
@@ -435,7 +409,6 @@ const YachtDetail = () => {
                       </Select>
                     </div>
                     
-                    {/* Captain Option */}
                     {yacht.captain.optional && (
                       <div className="flex items-center justify-between py-2">
                         <div className="flex items-center">
@@ -451,7 +424,6 @@ const YachtDetail = () => {
                       </div>
                     )}
                     
-                    {/* Price Breakdown */}
                     {rentalDays > 0 && (
                       <div className="border-t border-gray-200 pt-4 space-y-2">
                         <div className="flex justify-between text-sm">
@@ -478,7 +450,6 @@ const YachtDetail = () => {
                       </div>
                     )}
                     
-                    {/* Book Now Button */}
                     <Button 
                       onClick={handleBookNow} 
                       className="w-full bg-primary hover:bg-primary/90"
@@ -487,12 +458,10 @@ const YachtDetail = () => {
                       {instantBook ? "Book Now" : "Request to Book"}
                     </Button>
                     
-                    {/* Instant Book Badge */}
-                    {yacht.instantBook && (
-                      <div className="flex items-center justify-center text-sm text-gray-600">
-                        <Sailboat className="h-4 w-4 mr-1 text-primary" />
-                        <span>Instant Book Available</span>
-                      </div>
+                    {yacht && yacht.instantBook && (
+                      <Badge className="bg-accent/90 text-black font-medium">
+                        Instant Book
+                      </Badge>
                     )}
                   </div>
                 </CardContent>
