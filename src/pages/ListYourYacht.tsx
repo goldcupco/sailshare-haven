@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/shared/Footer";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
 import {
   Sailboat,
   DollarSign,
@@ -16,10 +17,96 @@ import {
   CheckCircle2,
   Clock,
   Star,
-  ArrowRight
+  ArrowRight,
+  ChevronLeft
 } from "lucide-react";
 
 const ListYourYacht = () => {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    yachtType: "",
+    yachtLength: "",
+    location: "",
+    comments: ""
+  });
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { id, value } = e.target;
+    setFormData({
+      ...formData,
+      [id]: value
+    });
+  };
+  
+  const handleGetStarted = () => {
+    // Scroll to form section
+    const formSection = document.getElementById("yacht-form");
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: "smooth" });
+    }
+    toast({
+      title: "Let's get you started!",
+      description: "Fill out the form below to list your yacht."
+    });
+  };
+  
+  const handleLearnMore = () => {
+    // Scroll to the "How It Works" section
+    const howItWorksSection = document.getElementById("how-it-works");
+    if (howItWorksSection) {
+      howItWorksSection.scrollIntoView({ behavior: "smooth" });
+    }
+    toast({
+      title: "Learn about our process",
+      description: "Discover how listing your yacht works in 3 simple steps."
+    });
+  };
+  
+  const handleSubscribe = () => {
+    toast({
+      title: "Subscription Successful!",
+      description: "Thank you for subscribing to our newsletter.",
+      variant: "default"
+    });
+  };
+  
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Check if required fields are filled
+    const requiredFields = ["firstName", "lastName", "email", "phone"];
+    const isFormValid = requiredFields.every(field => formData[field as keyof typeof formData]);
+    
+    if (isFormValid) {
+      toast({
+        title: "Information Submitted!",
+        description: "We'll contact you soon to complete your yacht listing.",
+        variant: "default"
+      });
+      // Reset form
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        yachtType: "",
+        yachtLength: "",
+        location: "",
+        comments: ""
+      });
+    } else {
+      toast({
+        title: "Please fill all required fields",
+        description: "We need your contact information to proceed.",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -37,10 +124,10 @@ const ListYourYacht = () => {
                   Turn your yacht into a source of income. Join thousands of yacht owners who trust SailHaven to connect them with qualified renters.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90" onClick={handleGetStarted}>
                     Get Started
                   </Button>
-                  <Button size="lg" variant="outline">
+                  <Button size="lg" variant="outline" onClick={handleLearnMore}>
                     Learn More
                   </Button>
                 </div>
@@ -125,7 +212,7 @@ const ListYourYacht = () => {
         </section>
         
         {/* How It Works Section */}
-        <section className="py-16 bg-ocean-50">
+        <section id="how-it-works" className="py-16 bg-ocean-50">
           <div className="container px-4 md:px-6">
             <div className="text-center mb-12">
               <h2 className="text-2xl md:text-3xl font-bold mb-4">
@@ -268,7 +355,21 @@ const ListYourYacht = () => {
                           </li>
                         ))}
                       </ul>
-                      <Button className="w-full bg-primary hover:bg-primary/90">Get Started</Button>
+                      <Button 
+                        className="w-full bg-primary hover:bg-primary/90"
+                        onClick={() => {
+                          toast({
+                            title: "Standard Plan Selected",
+                            description: "You've chosen our Standard Listing plan."
+                          });
+                          const formSection = document.getElementById("yacht-form");
+                          if (formSection) {
+                            formSection.scrollIntoView({ behavior: "smooth" });
+                          }
+                        }}
+                      >
+                        Get Started
+                      </Button>
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-lg mb-4">What's included:</h4>
@@ -332,7 +433,21 @@ const ListYourYacht = () => {
                           </li>
                         ))}
                       </ul>
-                      <Button className="w-full bg-primary hover:bg-primary/90">Get Started</Button>
+                      <Button 
+                        className="w-full bg-primary hover:bg-primary/90"
+                        onClick={() => {
+                          toast({
+                            title: "Premium Plan Selected",
+                            description: "You've chosen our Premium Listing plan. Great choice!"
+                          });
+                          const formSection = document.getElementById("yacht-form");
+                          if (formSection) {
+                            formSection.scrollIntoView({ behavior: "smooth" });
+                          }
+                        }}
+                      >
+                        Get Started
+                      </Button>
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-lg mb-4">Premium Benefits:</h4>
@@ -383,7 +498,7 @@ const ListYourYacht = () => {
         </section>
         
         {/* Get Started Form Section */}
-        <section className="py-16 bg-white">
+        <section id="yacht-form" className="py-16 bg-white">
           <div className="container px-4 md:px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               <div>
@@ -413,26 +528,47 @@ const ListYourYacht = () => {
                 </div>
               </div>
               <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleFormSubmit}>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" placeholder="Enter your first name" />
+                      <Input 
+                        id="firstName" 
+                        placeholder="Enter your first name" 
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" placeholder="Enter your last name" />
+                      <Input 
+                        id="lastName" 
+                        placeholder="Enter your last name" 
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                      />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="Enter your email address" />
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="Enter your email address" 
+                      value={formData.email}
+                      onChange={handleInputChange}
+                    />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="phone">Phone</Label>
-                    <Input id="phone" placeholder="Enter your phone number" />
+                    <Input 
+                      id="phone" 
+                      placeholder="Enter your phone number" 
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                    />
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -441,6 +577,8 @@ const ListYourYacht = () => {
                       <select
                         id="yachtType"
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        value={formData.yachtType}
+                        onChange={handleInputChange}
                       >
                         <option value="">Select type</option>
                         <option value="motor">Motor Yacht</option>
@@ -451,13 +589,23 @@ const ListYourYacht = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="yachtLength">Yacht Length (ft)</Label>
-                      <Input id="yachtLength" placeholder="Enter length in feet" />
+                      <Input 
+                        id="yachtLength" 
+                        placeholder="Enter length in feet" 
+                        value={formData.yachtLength}
+                        onChange={handleInputChange}
+                      />
                     </div>
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="location">Location</Label>
-                    <Input id="location" placeholder="Where is your yacht located?" />
+                    <Input 
+                      id="location" 
+                      placeholder="Where is your yacht located?" 
+                      value={formData.location}
+                      onChange={handleInputChange}
+                    />
                   </div>
                   
                   <div className="space-y-2">
@@ -466,10 +614,15 @@ const ListYourYacht = () => {
                       id="comments" 
                       placeholder="Tell us more about your yacht and any questions you have"
                       className="min-h-[100px]"
+                      value={formData.comments}
+                      onChange={handleInputChange}
                     />
                   </div>
                   
-                  <Button className="w-full bg-primary hover:bg-primary/90">
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-primary hover:bg-primary/90"
+                  >
                     Submit Information
                   </Button>
                   
@@ -492,7 +645,20 @@ const ListYourYacht = () => {
               <p className="text-white/90 mb-8">
                 Turn your yacht from an expense into an income-generating asset. Join thousands of successful yacht owners on the premier yacht rental marketplace.
               </p>
-              <Button size="lg" variant="secondary">
+              <Button 
+                size="lg" 
+                variant="secondary"
+                onClick={() => {
+                  const formSection = document.getElementById("yacht-form");
+                  if (formSection) {
+                    formSection.scrollIntoView({ behavior: "smooth" });
+                  }
+                  toast({
+                    title: "Let's get your yacht listed!",
+                    description: "Complete the form to join our marketplace."
+                  });
+                }}
+              >
                 List Your Yacht Now
               </Button>
             </div>
