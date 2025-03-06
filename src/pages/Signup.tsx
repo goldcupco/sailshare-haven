@@ -46,6 +46,9 @@ const Signup = () => {
     setTimeout(() => {
       setIsLoading(false);
       
+      // Set login state in localStorage
+      localStorage.setItem("isLoggedIn", "true");
+      
       toast({
         title: "Account created",
         description: "Welcome to SailHaven!",

@@ -1,11 +1,38 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Sailboat, Facebook, Twitter, Instagram, Youtube, MapPin, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubscribing(true);
+    // Simulate API call
+    setTimeout(() => {
+      setIsSubscribing(false);
+      setEmail("");
+      toast({
+        title: "Subscribed!",
+        description: "Thank you for subscribing to our newsletter.",
+      });
+    }, 1000);
+  };
+
   return (
     <footer className="bg-ocean-50 pt-16 pb-8 border-t border-gray-200/80">
       <div className="container px-4 md:px-6">
@@ -90,16 +117,23 @@ const Footer = () => {
             <p className="text-gray-600 mb-4">
               Subscribe to our newsletter for the latest updates and offers.
             </p>
-            <div className="space-y-2">
+            <form onSubmit={handleSubscribe} className="space-y-2">
               <Input 
                 type="email" 
                 placeholder="Your email address" 
                 className="bg-white" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubscribing}
               />
-              <Button className="w-full bg-primary hover:bg-primary/90">
-                Subscribe
+              <Button 
+                type="submit" 
+                className="w-full bg-primary hover:bg-primary/90"
+                disabled={isSubscribing}
+              >
+                {isSubscribing ? "Subscribing..." : "Subscribe"}
               </Button>
-            </div>
+            </form>
           </div>
         </div>
 

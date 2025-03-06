@@ -34,6 +34,9 @@ const Login = () => {
     setTimeout(() => {
       setIsLoading(false);
       
+      // Set login state in localStorage
+      localStorage.setItem("isLoggedIn", "true");
+      
       toast({
         title: "Login successful",
         description: "Welcome back to SailHaven!",

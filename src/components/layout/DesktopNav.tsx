@@ -1,9 +1,11 @@
 
 import { Link } from "react-router-dom";
-import { Heart, LogIn, MessageCircle, User } from "lucide-react";
+import { Heart, LogIn, LogOut, MessageCircle, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DestinationsDropdown } from "./DestinationsDropdown";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface DesktopNavProps {
   isScrolled: boolean;
@@ -11,6 +13,21 @@ interface DesktopNavProps {
 }
 
 export const DesktopNav = ({ isScrolled, isHomePage }: DesktopNavProps) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    // Check local storage for login state
+    return localStorage.getItem("isLoggedIn") === "true";
+  });
+  const { toast } = useToast();
+
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    setIsLoggedIn(false);
+    toast({
+      title: "Logged out successfully",
+      description: "You have been logged out of your account.",
+    });
+  };
+
   return (
     <>
       <nav className="hidden md:flex items-center space-x-1">
@@ -67,25 +84,41 @@ export const DesktopNav = ({ isScrolled, isHomePage }: DesktopNavProps) => {
           <MessageCircle className="h-5 w-5" />
         </Button>
         
-        <Link to="/login">
+        {isLoggedIn ? (
           <Button
             variant="ghost"
             className={cn(
               "items-center transition-colors",
               isScrolled || !isHomePage ? "text-gray-700 hover:text-primary" : "text-white/90 hover:text-white"
             )}
+            onClick={handleLogout}
           >
-            <LogIn className="h-5 w-5 mr-1" />
-            Log In
+            <LogOut className="h-5 w-5 mr-1" />
+            Log Out
           </Button>
-        </Link>
-        
-        <Link to="/signup">
-          <Button className="bg-primary hover:bg-primary/90">
-            <User className="h-5 w-5 mr-1" />
-            Sign Up
-          </Button>
-        </Link>
+        ) : (
+          <>
+            <Link to="/login">
+              <Button
+                variant="ghost"
+                className={cn(
+                  "items-center transition-colors",
+                  isScrolled || !isHomePage ? "text-gray-700 hover:text-primary" : "text-white/90 hover:text-white"
+                )}
+              >
+                <LogIn className="h-5 w-5 mr-1" />
+                Log In
+              </Button>
+            </Link>
+            
+            <Link to="/signup">
+              <Button className="bg-primary hover:bg-primary/90">
+                <User className="h-5 w-5 mr-1" />
+                Sign Up
+              </Button>
+            </Link>
+          </>
+        )}
       </div>
     </>
   );
