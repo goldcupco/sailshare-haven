@@ -9,6 +9,7 @@ interface RatingProps {
   className?: string;
   size?: "sm" | "md" | "lg";
   showValue?: boolean;
+  readOnly?: boolean;
 }
 
 const Rating = ({
@@ -17,6 +18,7 @@ const Rating = ({
   className,
   size = "md",
   showValue = false,
+  readOnly = false,
 }: RatingProps) => {
   const fullStars = Math.floor(value);
   const hasHalfStar = value % 1 >= 0.5;

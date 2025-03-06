@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { Rating } from "@/components/ui/rating";
-import { yachts } from "@/lib/data";
+import { featuredYachts, allYachts } from "@/lib/data";
 import { Yacht } from "@/lib/types";
 import {
   CalendarIcon,
@@ -26,13 +26,35 @@ import {
   MessageSquare,
   Info,
   Home,
-  Ruler
+  RulerIcon
 } from "lucide-react";
+
+// Sample reviews data
+const sampleReviews = [
+  {
+    user: "John D.",
+    date: "June 2023",
+    rating: 5,
+    text: "Amazing experience! The yacht was in perfect condition and the crew was professional and friendly."
+  },
+  {
+    user: "Sarah M.",
+    date: "May 2023",
+    rating: 4.5,
+    text: "Wonderful day on the water. Would highly recommend this yacht to anyone looking for a luxurious experience."
+  },
+  {
+    user: "Robert T.",
+    date: "April 2023",
+    rating: 5,
+    text: "Exceeded all expectations. The yacht was beautiful and had all the amenities we needed."
+  }
+];
 
 const YachtDetail = () => {
   const { toast } = useToast();
   const { id } = useParams<{ id: string }>();
-  const yacht: Yacht | undefined = yachts.find((y) => y.id === id);
+  const yacht: Yacht | undefined = allYachts.find((y) => y.id === id);
 
   if (!yacht) {
     return (
@@ -52,6 +74,19 @@ const YachtDetail = () => {
         <Footer />
       </div>
     );
+  }
+
+  // Add reviews if they don't exist
+  if (!yacht.reviews) {
+    yacht.reviews = sampleReviews;
+  }
+  
+  // Map pricePerDay to price for compatibility
+  yacht.price = yacht.pricePerDay;
+  
+  // Add owner rating if it doesn't exist
+  if (!yacht.owner.rating) {
+    yacht.owner.rating = 4.9;
   }
 
   const handleBookNow = () => {
@@ -172,14 +207,14 @@ const YachtDetail = () => {
                 </div>
                 <div className="flex items-center text-gray-600">
                   <MapPin className="h-4 w-4 mr-1" />
-                  <span>{yacht.location}</span>
+                  <span>{yacht.location.city}, {yacht.location.state}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 border border-gray-100 rounded-xl p-6">
                 <div className="flex items-center">
                   <div className="mr-3 p-2 rounded-full bg-ocean-50">
-                    <Ruler className="h-5 w-5 text-ocean-600" />
+                    <RulerIcon className="h-5 w-5 text-ocean-600" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500">Length</p>
@@ -273,7 +308,7 @@ const YachtDetail = () => {
                       <div>
                         <p className="text-sm text-gray-500">Captain</p>
                         <p className="font-semibold">
-                          {yacht.captain ? "Included" : "Optional"}
+                          {yacht.captain.included ? "Included" : "Optional"}
                         </p>
                       </div>
                     </div>
@@ -350,7 +385,7 @@ const YachtDetail = () => {
                   </div>
                 </div>
                 <p className="text-gray-600">
-                  {yacht.location}{" "}
+                  {yacht.location.city}, {yacht.location.state}, {yacht.location.country}{" "}
                   <span className="text-primary hover:underline cursor-pointer">
                     Get directions
                   </span>
@@ -479,7 +514,7 @@ const YachtDetail = () => {
               Similar Yachts You May Like
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {yachts
+              {allYachts
                 .filter((y) => y.id !== yacht.id)
                 .slice(0, 3)
                 .map((similarYacht) => (
@@ -501,14 +536,14 @@ const YachtDetail = () => {
                     <div className="flex items-center mb-1">
                       <Rating value={similarYacht.rating} readOnly size="sm" />
                       <span className="text-sm ml-1">
-                        ({similarYacht.reviews.length})
+                        ({similarYacht.reviewCount})
                       </span>
                     </div>
                     <p className="text-gray-600 text-sm mb-1">
-                      {similarYacht.location}
+                      {similarYacht.location.city}, {similarYacht.location.state}
                     </p>
                     <p className="font-bold">
-                      ${similarYacht.price}{" "}
+                      ${similarYacht.pricePerDay}{" "}
                       <span className="text-gray-600 font-normal">/ day</span>
                     </p>
                   </Link>

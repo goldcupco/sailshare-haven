@@ -7,6 +7,7 @@ export interface Yacht {
   imageUrl: string;
   images: string[];
   pricePerDay: number;
+  price?: number; // Adding this for compatibility
   capacity: number;
   length: number;
   cabins: number;
@@ -22,6 +23,12 @@ export interface Yacht {
   amenities: string[];
   rating: number;
   reviewCount: number;
+  reviews?: {
+    user: string;
+    date: string;
+    rating: number;
+    text: string;
+  }[];
   captain: {
     included: boolean;
     optional: boolean;
@@ -35,6 +42,7 @@ export interface Yacht {
     avatarUrl: string;
     responseRate: number;
     responseTime: string;
+    rating?: number;
   };
 }
 
