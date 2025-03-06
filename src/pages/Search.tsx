@@ -68,11 +68,15 @@ const Search = () => {
         filteredYachts = filteredYachts.filter(yacht => yacht.capacity >= guestCount);
       }
       
-      // Filter by yacht types
+      // Filter by yacht types - Fix the exact matching here
       if (yachtTypes.length > 0) {
         filteredYachts = filteredYachts.filter(yacht => 
           yachtTypes.includes(yacht.type)
         );
+        
+        // Add debugging to understand the filtering
+        console.log("Filtering by yacht types:", yachtTypes);
+        console.log("Filtered yachts:", filteredYachts.map(y => ({id: y.id, name: y.name, type: y.type})));
       }
       
       // Filter by features/amenities
