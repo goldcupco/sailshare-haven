@@ -39,7 +39,7 @@ const Login = () => {
       
       toast({
         title: "Login successful",
-        description: "Welcome back to SailHaven!",
+        description: "Welcome back to YachtRent!",
       });
       
       navigate("/");
@@ -53,7 +53,7 @@ const Login = () => {
           <div className="text-center space-y-2">
             <Link to="/" className="inline-flex items-center gap-2 mb-4">
               <Sailboat className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">SailHaven</span>
+              <span className="text-2xl font-bold">YachtRent</span>
             </Link>
             <h1 className="text-2xl md:text-3xl font-bold">Welcome back</h1>
             <p className="text-gray-500">Sign in to continue your sailing journey</p>

@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/shared/Footer";
@@ -25,7 +24,7 @@ const HowItWorks = () => {
           <div className="container px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-3xl md:text-5xl font-bold mb-6">
-                How SailHaven Works
+                How YachtRent Works
               </h1>
               <p className="text-lg text-gray-700 mb-8">
                 Discover how easy it is to book your dream yacht experience or list your vessel with us.
@@ -102,7 +101,7 @@ const HowItWorks = () => {
                 Hear From Our Happy Sailors
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Read what our customers have to say about their experiences with SailHaven.
+                Read what our customers have to say about their experiences with YachtRent.
               </p>
             </div>
             
@@ -152,7 +151,7 @@ const HowItWorks = () => {
                   Trust & Safety Guaranteed
                 </h2>
                 <p className="text-gray-600 mb-8">
-                  At SailHaven, we prioritize your safety and peace of mind. Every yacht in our marketplace undergoes a rigorous verification process, and all transactions are secure.
+                  At YachtRent, we prioritize your safety and peace of mind. Every yacht in our marketplace undergoes a rigorous verification process, and all transactions are secure.
                 </p>
                 <div className="space-y-4">
                   {[
@@ -217,7 +216,7 @@ const HowItWorks = () => {
                 Frequently Asked Questions
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Find answers to common questions about booking and renting yachts with SailHaven.
+                Find answers to common questions about booking and renting yachts with YachtRent.
               </p>
             </div>
             

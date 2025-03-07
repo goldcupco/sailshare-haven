@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Sailboat, Facebook, Twitter, Instagram, Youtube, MapPin, Phone, Mail } from "lucide-react";
@@ -40,7 +41,7 @@ const Footer = () => {
           <div className="space-y-4">
             <div className="flex items-center">
               <Sailboat className="h-8 w-8 text-primary mr-2" />
-              <h2 className="text-2xl font-bold text-gray-900">SailHaven</h2>
+              <h2 className="text-2xl font-bold text-gray-900">YachtRent</h2>
             </div>
             <p className="text-gray-600">
               Experience luxury on the water. Rent the perfect yacht for your next adventure.
@@ -107,7 +108,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 text-primary mr-3 flex-shrink-0" />
-                <span className="text-gray-600">info@sailhaven.com</span>
+                <span className="text-gray-600">info@yachtrent.com</span>
               </li>
             </ul>
           </div>
@@ -139,7 +140,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-200 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-600 text-sm">
-            &copy; {new Date().getFullYear()} SailHaven. All rights reserved.
+            &copy; {new Date().getFullYear()} YachtRent. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link to="#" className="text-gray-600 hover:text-primary text-sm">

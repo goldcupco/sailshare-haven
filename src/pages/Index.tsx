@@ -144,7 +144,7 @@ const Index = () => {
                   delay: 100
                 },
                 {
-                  quote: "As a first-time yacht renter, I was nervous, but the SailHaven team made everything so easy. The yacht was gorgeous and the day couldn't have been better.",
+                  quote: "As a first-time yacht renter, I was nervous, but the YachtRent team made everything so easy. The yacht was gorgeous and the day couldn't have been better.",
                   author: "Michael K.",
                   location: "Newport, RI",
                   delay: 200

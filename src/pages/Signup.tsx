@@ -51,7 +51,7 @@ const Signup = () => {
       
       toast({
         title: "Account created",
-        description: "Welcome to SailHaven!",
+        description: "Welcome to YachtRent!",
       });
       
       navigate("/");
@@ -65,10 +65,10 @@ const Signup = () => {
           <div className="text-center space-y-2">
             <Link to="/" className="inline-flex items-center gap-2 mb-4">
               <Sailboat className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold">SailHaven</span>
+              <span className="text-2xl font-bold">YachtRent</span>
             </Link>
             <h1 className="text-2xl md:text-3xl font-bold">Create an account</h1>
-            <p className="text-gray-500">Join SailHaven and start your sailing adventure</p>
+            <p className="text-gray-500">Join YachtRent and start your sailing adventure</p>
           </div>
 
           <form onSubmit={handleSignup} className="space-y-4">
