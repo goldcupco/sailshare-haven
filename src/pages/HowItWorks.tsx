@@ -1,4 +1,6 @@
+
 import React from "react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/shared/Footer";
 import { Button } from "@/components/ui/button";
@@ -30,12 +32,16 @@ const HowItWorks = () => {
                 Discover how easy it is to book your dream yacht experience or list your vessel with us.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-primary hover:bg-primary/90">
-                  Find a Yacht
-                </Button>
-                <Button size="lg" variant="outline">
-                  List Your Yacht
-                </Button>
+                <Link to="/search">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90">
+                    Find a Yacht
+                  </Button>
+                </Link>
+                <Link to="/list-your-yacht">
+                  <Button size="lg" variant="outline">
+                    List Your Yacht
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -248,7 +254,7 @@ const HowItWorks = () => {
                     <summary className="flex justify-between items-center font-medium cursor-pointer list-none">
                       <span className="text-lg">{faq.question}</span>
                       <span className="transition group-open:rotate-180">
-                        <svg fill="none" height="24" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" width="24">
+                        <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24">
                           <path d="M6 9l6 6 6-6"></path>
                         </svg>
                       </span>
@@ -272,12 +278,16 @@ const HowItWorks = () => {
                 Whether you're planning a day trip, weekend getaway, or extended voyage, we have the perfect yacht for you.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" variant="secondary">
-                  Find a Yacht
-                </Button>
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
-                  List Your Yacht
-                </Button>
+                <Link to="/search">
+                  <Button size="lg" variant="secondary">
+                    Find a Yacht
+                  </Button>
+                </Link>
+                <Link to="/list-your-yacht">
+                  <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary">
+                    List Your Yacht
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
