@@ -12,15 +12,14 @@ import { testSupabaseConnection } from "@/lib/supabase";
 const Index = () => {
   useEffect(() => {
     // Test Supabase connection when the component mounts
-    const checkConnection = async () => {
-      try {
-        await testSupabaseConnection();
-      } catch (error) {
+    // Add a slight delay to avoid multiple toasts appearing at once
+    const timer = setTimeout(() => {
+      testSupabaseConnection().catch(error => {
         console.error("Failed to test Supabase connection:", error);
-      }
-    };
+      });
+    }, 1000);
     
-    checkConnection();
+    return () => clearTimeout(timer);
   }, []);
 
   return (

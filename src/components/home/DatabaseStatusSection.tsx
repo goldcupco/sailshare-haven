@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { testSupabaseConnection } from "@/lib/supabase";
 import { CheckCircle2, XCircle, DatabaseIcon, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const DatabaseStatusSection = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
@@ -31,7 +32,17 @@ const DatabaseStatusSection = () => {
   };
 
   const handleRefresh = () => {
-    window.location.reload();
+    // Show toast to indicate refresh is happening
+    toast({
+      title: "Refreshing Application",
+      description: "Reloading to apply environment variables...",
+      duration: 2000,
+    });
+    
+    // Add a slight delay before refreshing to allow the toast to be seen
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
   };
 
   const closeWarning = () => {
@@ -106,6 +117,7 @@ const DatabaseStatusSection = () => {
                   size="sm" 
                   className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-amber-100"
                   onClick={closeWarning}
+                  aria-label="Close warning"
                 >
                   <XCircle className="h-4 w-4 text-amber-600" />
                   <span className="sr-only">Close</span>
@@ -116,7 +128,7 @@ const DatabaseStatusSection = () => {
                 </p>
                 <div className="mt-2">
                   <Button 
-                    variant="outline" 
+                    variant="secondary" 
                     size="sm" 
                     className="bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"
                     onClick={handleRefresh}

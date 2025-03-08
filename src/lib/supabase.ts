@@ -20,6 +20,7 @@ export const testSupabaseConnection = async () => {
     if (supabaseUrl === 'https://supabase-demo.example.com') {
       console.warn("Using demo Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables for production use.");
       
+      // Show a toast notification that will auto-dismiss after 5 seconds
       toast({
         title: "Environment Variables Not Applied",
         description: "If you've created an .env file, you may need to refresh the project or restart the server for changes to take effect.",
@@ -38,6 +39,7 @@ export const testSupabaseConnection = async () => {
     
     console.log("Database connected successfully:", data);
     
+    // Show a toast notification that will auto-dismiss after 3 seconds
     toast({
       title: "Database Connected",
       description: "Successfully connected to the Supabase database",
@@ -48,6 +50,7 @@ export const testSupabaseConnection = async () => {
   } catch (error: any) {
     console.error('Supabase connection error:', error);
     
+    // Show a toast notification that will auto-dismiss after 5 seconds
     toast({
       title: "Database Connection Failed",
       description: error.message || "Could not connect to the database. Check your configuration.",
