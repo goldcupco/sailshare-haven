@@ -1,10 +1,8 @@
-
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 import { toast } from "@/hooks/use-toast";
 
 // Get environment variables with fallbacks
-// Using default demo credentials if environment variables are not set
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://supabase-demo.example.com';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'demo-anon-key';
 
@@ -22,8 +20,8 @@ export const testSupabaseConnection = async () => {
       console.warn("Using demo Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables for production use.");
       
       toast({
-        title: "Supabase Configuration Required",
-        description: "Please set your Supabase URL and Anonymous Key in the environment variables.",
+        title: "Environment Variables Not Applied",
+        description: "If you've created an .env file, you may need to refresh the project or restart the server for changes to take effect.",
         variant: "destructive",
       });
       

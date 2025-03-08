@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { testSupabaseConnection } from "@/lib/supabase";
-import { CheckCircle2, XCircle, DatabaseIcon, Loader2, AlertTriangle } from "lucide-react";
+import { CheckCircle2, XCircle, DatabaseIcon, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 
 const DatabaseStatusSection = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
@@ -29,6 +29,10 @@ const DatabaseStatusSection = () => {
     }
   };
 
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   return (
     <div className="py-8">
       <div className="container px-4 md:px-6">
@@ -41,7 +45,7 @@ const DatabaseStatusSection = () => {
                   <h3 className="text-lg font-medium">Supabase Connection Status</h3>
                   <p className="text-sm text-gray-500">
                     {isDemo ? 
-                      "Demo mode - environment variables not set" : 
+                      "Environment variables not detected" : 
                       isConnected === null
                         ? "Check your database connection"
                         : isConnected
@@ -55,7 +59,7 @@ const DatabaseStatusSection = () => {
                 {isDemo ? (
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-amber-500" />
-                    <span className="text-amber-600 font-medium">Demo Mode</span>
+                    <span className="text-amber-600 font-medium">Config Needed</span>
                   </div>
                 ) : isConnected !== null && (
                   <div className="flex items-center gap-2">
@@ -92,17 +96,28 @@ const DatabaseStatusSection = () => {
             
             {isDemo && (
               <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
-                <h4 className="font-medium text-amber-800 mb-1">Setup Required</h4>
+                <h4 className="font-medium text-amber-800 mb-1">Environment Not Detected</h4>
                 <p className="text-sm text-amber-700">
-                  Please set the following environment variables:
+                  If you've already created an .env file, try refreshing the application:
+                </p>
+                <div className="mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"
+                    onClick={handleRefresh}
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Refresh Application
+                  </Button>
+                </div>
+                <p className="text-sm text-amber-700 mt-3">
+                  Your .env file should be in the project root with these variables:
                 </p>
                 <ul className="text-sm text-amber-700 list-disc list-inside mt-1">
                   <li>VITE_SUPABASE_URL - Your Supabase project URL</li>
                   <li>VITE_SUPABASE_ANON_KEY - Your Supabase anonymous key</li>
                 </ul>
-                <p className="text-sm text-amber-700 mt-2">
-                  Create a new .env file in your project root with these variables.
-                </p>
               </div>
             )}
           </CardContent>
