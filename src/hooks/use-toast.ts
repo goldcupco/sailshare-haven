@@ -146,7 +146,7 @@ function useToast() {
 }
 
 function toast(props: ToastOptions) {
-  const id = props.id || generateId();
+  const id = generateId();
 
   const update = (props: ToastOptions) =>
     dispatch({
