@@ -34,25 +34,18 @@ export const testSupabaseConnection = async (forceTest = false) => {
   try {
     console.log("Testing Supabase connection...");
     
-    // Test connection by making a simple query
-    const { error } = await supabase.from('yacht_listings').select('count').limit(1);
+    // Test connection by making a simple query to the newly created table
+    const { data, error } = await supabase
+      .from('yacht_listings')
+      .select('count')
+      .limit(1);
     
     if (error) {
-      // Check if this is a "relation does not exist" error - that's okay for a new project
-      if (error.message && error.message.includes('relation "yacht_listings" does not exist')) {
-        console.log("Database connected (table doesn't exist yet)");
-        toast({
-          title: "Database Connected",
-          description: "Successfully connected to Supabase. Tables will be created as needed.",
-        });
-        connectionTestResult = true;
-        return true;
-      }
-      
+      console.error('Database query error:', error);
       throw error;
     }
     
-    console.log("Database connected successfully");
+    console.log("Database connected successfully:", data);
     toast({
       title: "Database Connected",
       description: "Successfully connected to the Supabase database",

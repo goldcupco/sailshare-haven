@@ -13,153 +13,147 @@ export interface Database {
       yacht_listings: {
         Row: {
           id: string
-          owner_id: string
           name: string
+          description: string | null
           type: string
-          length: number
           capacity: number
-          cabins: number
-          location: string
+          length_ft: number
+          year_built: number | null
+          pricePerDay: number
+          pricePerWeek: number | null
+          instantBook: boolean
           city: string
           state: string
           country: string
           lat: number | null
           lng: number | null
-          description: string
-          price_per_day: number
-          instant_book: boolean
-          year: number
-          amenities: string[]
-          images: string[]
+          rating: number | null
+          reviews_count: number
+          main_image_url: string | null
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
-          owner_id: string
           name: string
+          description?: string | null
           type: string
-          length: number
           capacity: number
-          cabins: number
-          location: string
+          length_ft: number
+          year_built?: number | null
+          pricePerDay: number
+          pricePerWeek?: number | null
+          instantBook?: boolean
           city: string
           state: string
           country: string
           lat?: number | null
           lng?: number | null
-          description: string
-          price_per_day: number
-          instant_book: boolean
-          year: number
-          amenities: string[]
-          images: string[]
+          rating?: number | null
+          reviews_count?: number
+          main_image_url?: string | null
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
-          owner_id?: string
           name?: string
+          description?: string | null
           type?: string
-          length?: number
           capacity?: number
-          cabins?: number
-          location?: string
+          length_ft?: number
+          year_built?: number | null
+          pricePerDay?: number
+          pricePerWeek?: number | null
+          instantBook?: boolean
           city?: string
           state?: string
           country?: string
           lat?: number | null
           lng?: number | null
-          description?: string
-          price_per_day?: number
-          instant_book?: boolean
-          year?: number
-          amenities?: string[]
-          images?: string[]
+          rating?: number | null
+          reviews_count?: number
+          main_image_url?: string | null
           created_at?: string
           updated_at?: string
         }
       }
-      bookings: {
+      yacht_images: {
         Row: {
           id: string
           yacht_id: string
-          user_id: string
-          start_date: string
-          end_date: string
-          total_price: number
-          status: string
-          captain_included: boolean
-          guest_count: number
-          special_requests: string | null
+          image_url: string
+          is_main: boolean
+          caption: string | null
+          sort_order: number
           created_at: string
-          updated_at: string
         }
         Insert: {
           id?: string
           yacht_id: string
-          user_id: string
-          start_date: string
-          end_date: string
-          total_price: number
-          status: string
-          captain_included: boolean
-          guest_count: number
-          special_requests?: string | null
+          image_url: string
+          is_main?: boolean
+          caption?: string | null
+          sort_order?: number
           created_at?: string
-          updated_at?: string
         }
         Update: {
           id?: string
           yacht_id?: string
-          user_id?: string
-          start_date?: string
-          end_date?: string
-          total_price?: number
-          status?: string
-          captain_included?: boolean
-          guest_count?: number
-          special_requests?: string | null
+          image_url?: string
+          is_main?: boolean
+          caption?: string | null
+          sort_order?: number
           created_at?: string
-          updated_at?: string
         }
       }
-      profiles: {
+      yacht_amenities: {
         Row: {
           id: string
-          email: string
-          first_name: string
-          last_name: string
-          avatar_url: string | null
-          phone: string | null
+          yacht_id: string
+          amenity: string
           created_at: string
-          updated_at: string
         }
         Insert: {
-          id: string
-          email: string
-          first_name: string
-          last_name: string
-          avatar_url?: string | null
-          phone?: string | null
+          id?: string
+          yacht_id: string
+          amenity: string
           created_at?: string
-          updated_at?: string
         }
         Update: {
           id?: string
-          email?: string
-          first_name?: string
-          last_name?: string
-          avatar_url?: string | null
-          phone?: string | null
+          yacht_id?: string
+          amenity?: string
           created_at?: string
-          updated_at?: string
         }
       }
     }
     Views: {
-      [_ in never]: never
+      yacht_listings_with_amenities: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          type: string
+          capacity: number
+          length_ft: number
+          year_built: number | null
+          pricePerDay: number
+          pricePerWeek: number | null
+          instantBook: boolean
+          city: string
+          state: string
+          country: string
+          lat: number | null
+          lng: number | null
+          rating: number | null
+          reviews_count: number
+          main_image_url: string | null
+          created_at: string
+          updated_at: string
+          amenities: string[] | null
+        }
+      }
     }
     Functions: {
       [_ in never]: never

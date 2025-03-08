@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { testSupabaseConnection, clearConnectionTestCache } from "@/lib/supabase";
-import { CheckCircle2, XCircle, DatabaseIcon, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, DatabaseIcon, Loader2, ExternalLink } from "lucide-react";
 
 const DatabaseStatusSection = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
@@ -22,6 +22,10 @@ const DatabaseStatusSection = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openSupabaseDashboard = () => {
+    window.open("https://supabase.com/dashboard/project/yxthrrmhtjudhhxlrjig", "_blank");
   };
 
   useEffect(() => {
@@ -65,20 +69,31 @@ const DatabaseStatusSection = () => {
                   </div>
                 )}
                 
-                <Button 
-                  onClick={checkConnection} 
-                  disabled={loading}
-                  variant="outline"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Checking...
-                    </>
-                  ) : (
-                    "Test Connection"
-                  )}
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={checkConnection} 
+                    disabled={loading}
+                    variant="outline"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Checking...
+                      </>
+                    ) : (
+                      "Test Connection"
+                    )}
+                  </Button>
+                  
+                  <Button 
+                    onClick={openSupabaseDashboard} 
+                    variant="outline"
+                    className="flex items-center"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Dashboard
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>

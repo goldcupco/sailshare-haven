@@ -9,10 +9,184 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      yacht_amenities: {
+        Row: {
+          amenity: string
+          created_at: string | null
+          id: string
+          yacht_id: string
+        }
+        Insert: {
+          amenity: string
+          created_at?: string | null
+          id?: string
+          yacht_id: string
+        }
+        Update: {
+          amenity?: string
+          created_at?: string | null
+          id?: string
+          yacht_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "yacht_amenities_yacht_id_fkey"
+            columns: ["yacht_id"]
+            isOneToOne: false
+            referencedRelation: "yacht_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "yacht_amenities_yacht_id_fkey"
+            columns: ["yacht_id"]
+            isOneToOne: false
+            referencedRelation: "yacht_listings_with_amenities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      yacht_images: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          id: string
+          image_url: string
+          is_main: boolean | null
+          sort_order: number | null
+          yacht_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          image_url: string
+          is_main?: boolean | null
+          sort_order?: number | null
+          yacht_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string
+          is_main?: boolean | null
+          sort_order?: number | null
+          yacht_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "yacht_images_yacht_id_fkey"
+            columns: ["yacht_id"]
+            isOneToOne: false
+            referencedRelation: "yacht_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "yacht_images_yacht_id_fkey"
+            columns: ["yacht_id"]
+            isOneToOne: false
+            referencedRelation: "yacht_listings_with_amenities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      yacht_listings: {
+        Row: {
+          capacity: number
+          city: string
+          country: string
+          created_at: string | null
+          description: string | null
+          id: string
+          instantbook: boolean | null
+          lat: number | null
+          length_ft: number
+          lng: number | null
+          main_image_url: string | null
+          name: string
+          priceperday: number
+          priceperweek: number | null
+          rating: number | null
+          reviews_count: number | null
+          state: string
+          type: string
+          updated_at: string | null
+          year_built: number | null
+        }
+        Insert: {
+          capacity: number
+          city: string
+          country: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          instantbook?: boolean | null
+          lat?: number | null
+          length_ft: number
+          lng?: number | null
+          main_image_url?: string | null
+          name: string
+          priceperday: number
+          priceperweek?: number | null
+          rating?: number | null
+          reviews_count?: number | null
+          state: string
+          type: string
+          updated_at?: string | null
+          year_built?: number | null
+        }
+        Update: {
+          capacity?: number
+          city?: string
+          country?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          instantbook?: boolean | null
+          lat?: number | null
+          length_ft?: number
+          lng?: number | null
+          main_image_url?: string | null
+          name?: string
+          priceperday?: number
+          priceperweek?: number | null
+          rating?: number | null
+          reviews_count?: number | null
+          state?: string
+          type?: string
+          updated_at?: string | null
+          year_built?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      yacht_listings_with_amenities: {
+        Row: {
+          amenities: string[] | null
+          capacity: number | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          description: string | null
+          id: string | null
+          instantbook: boolean | null
+          lat: number | null
+          length_ft: number | null
+          lng: number | null
+          main_image_url: string | null
+          name: string | null
+          priceperday: number | null
+          priceperweek: number | null
+          rating: number | null
+          reviews_count: number | null
+          state: string | null
+          type: string | null
+          updated_at: string | null
+          year_built: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
