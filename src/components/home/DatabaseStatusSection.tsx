@@ -2,8 +2,20 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { testSupabaseConnection, clearConnectionTestCache } from "@/lib/supabase";
-import { CheckCircle2, XCircle, DatabaseIcon, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
+import { 
+  testSupabaseConnection, 
+  clearConnectionTestCache, 
+  forceAppRefresh 
+} from "@/lib/supabase";
+import { 
+  CheckCircle2, 
+  XCircle, 
+  DatabaseIcon, 
+  Loader2, 
+  AlertTriangle, 
+  RefreshCw,
+  X
+} from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const DatabaseStatusSection = () => {
@@ -19,15 +31,20 @@ const DatabaseStatusSection = () => {
     
     // More thorough check - we want to see if they're actual Supabase values
     const hasValidEnvVars = !!(supabaseUrl && supabaseAnonKey && 
-                           supabaseUrl.includes('supabase.co'));
+                           supabaseUrl.includes('supabase.co') &&
+                           supabaseAnonKey.length > 20);
     
     setIsDemo(!hasValidEnvVars);
     
-    console.log("Enhanced environment variables check:", { 
+    // Log detailed diagnostics to help debug environment variable issues
+    console.log("Environment variables diagnostic check:", { 
       hasUrl: !!supabaseUrl, 
-      urlValid: supabaseUrl?.includes('supabase.co'),
+      urlLength: supabaseUrl?.length || 0,
+      urlValid: supabaseUrl?.includes('supabase.co') || false,
       hasKey: !!supabaseAnonKey,
-      isDemoMode: !hasValidEnvVars
+      keyLength: supabaseAnonKey?.length || 0,
+      isValidConfig: hasValidEnvVars,
+      timestamp: new Date().toISOString()
     });
   }, []);
 
@@ -48,20 +65,15 @@ const DatabaseStatusSection = () => {
     }
   };
 
-  const handleRefresh = () => {
+  const handleForceRefresh = () => {
     toast({
-      title: "Refreshing Application",
-      description: "Reloading to apply environment variables...",
-      duration: 2000,
+      title: "Force Refreshing Application",
+      description: "Reloading to apply environment variables in Lovable.dev...",
+      duration: 3000,
     });
     
-    // Clear cache before reload
-    clearConnectionTestCache();
-    
-    // Force a hard refresh to ensure the browser fetches new env values
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
+    // Use the new forceAppRefresh function
+    forceAppRefresh();
   };
 
   return (
@@ -133,31 +145,31 @@ const DatabaseStatusSection = () => {
                   onClick={() => setShowWarning(false)}
                   aria-label="Close warning"
                 >
-                  <XCircle className="h-4 w-4" />
+                  <X className="h-4 w-4" />
                 </button>
-                <h4 className="font-medium text-amber-800 mb-1">Invalid or Missing Environment Variables</h4>
+                <h4 className="font-medium text-amber-800 mb-1">Environment Variables in Lovable.dev</h4>
                 <p className="text-sm text-amber-700 mb-3">
-                  The environment variables are either missing or not being correctly loaded.
+                  Environment variables may not be correctly loaded in the Lovable.dev environment.
                 </p>
                 <div className="mb-3">
                   <Button 
                     variant="secondary" 
                     size="sm" 
                     className="bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200"
-                    onClick={handleRefresh}
+                    onClick={handleForceRefresh}
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh Application
+                    Force App Refresh
                   </Button>
                 </div>
                 <p className="text-sm text-amber-700">
-                  Tips for troubleshooting:
+                  Tips for Lovable.dev environment:
                 </p>
                 <ul className="text-sm text-amber-700 list-disc list-inside mt-1">
-                  <li>Verify .env file is in the project root (not in src folder)</li>
-                  <li>Environment variables must start with VITE_</li>
-                  <li>Restart the dev server after changing .env file</li>
-                  <li>Check for typos in variable names</li>
+                  <li>Variables should be properly set in your project settings</li>
+                  <li>Use the Force App Refresh button to reload with variables</li>
+                  <li>Check console logs for detailed diagnostics</li>
+                  <li>Make sure variable names begin with VITE_</li>
                 </ul>
               </div>
             )}

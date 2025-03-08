@@ -19,6 +19,8 @@ const Index = () => {
     // Only test connection once to avoid toast pileups
     if (hasTestedConnection) return;
     
+    console.log("Index component mounted - initializing connection test");
+    
     // Test Supabase connection with a slight delay to allow UI to render first
     const timer = setTimeout(() => {
       testSupabaseConnection()

@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 import { toast } from "@/hooks/use-toast";
@@ -6,11 +7,14 @@ import { toast } from "@/hooks/use-toast";
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-// Improved check for valid environment variables - with logging
-console.log("Environment check:", {
-  supabaseUrlPresent: !!supabaseUrl,
-  supabaseKeyPresent: !!supabaseAnonKey,
-  supabaseUrlLength: supabaseUrl?.length || 0,
+// Enhanced environment variable logging - immediately log when the module loads
+console.log("%c🔑 Supabase Environment Check", "background: #3ECF8E; color: white; padding: 2px 5px; border-radius: 3px;", {
+  urlDetected: !!supabaseUrl,
+  urlValid: supabaseUrl?.includes('supabase.co'),
+  urlLength: supabaseUrl?.length || 0,
+  keyDetected: !!supabaseAnonKey,
+  keyLength: supabaseAnonKey?.length || 0,
+  timestamp: new Date().toISOString(),
 });
 
 // Create the final variables based on environment availability
@@ -35,18 +39,24 @@ export const testSupabaseConnection = async (forceTest = false) => {
   }
   
   try {
-    // Check if we're using real credentials
+    // Enhanced check for valid environment variables
     const hasValidEnvVars = !!supabaseUrl && !!supabaseAnonKey && 
-                          supabaseUrl.includes('supabase.co');
+                          supabaseUrl.includes('supabase.co') && 
+                          supabaseAnonKey.length > 20;
     
     if (!hasValidEnvVars) {
-      console.warn("Using demo Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables for production use.");
+      console.warn("Using demo Supabase credentials or invalid configuration detected.", {
+        urlPresent: !!supabaseUrl,
+        urlValid: supabaseUrl?.includes('supabase.co'),
+        keyPresent: !!supabaseAnonKey,
+        keyValidLength: supabaseAnonKey?.length > 20
+      });
       
       toast({
-        title: "Environment Variables Not Detected",
-        description: "Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file and restart the dev server.",
+        title: "Environment Variables Issue",
+        description: "Supabase configuration issue detected. In Lovable.dev, try forcing a refresh using the button below.",
         variant: "destructive",
-        duration: 5000,
+        duration: 6000,
       });
       
       connectionTestResult = false;
@@ -56,7 +66,7 @@ export const testSupabaseConnection = async (forceTest = false) => {
     // If we get here, environment variables are applied
     console.log("Using Supabase configuration:", { 
       url: supabaseUrl.substring(0, 15) + '...', // Log partial URL for security
-      hasKey: !!supabaseAnonKey
+      keyValid: supabaseAnonKey.length > 20
     });
     
     // Test connection by making a simple query
@@ -89,6 +99,17 @@ export const testSupabaseConnection = async (forceTest = false) => {
     connectionTestResult = false;
     return false;
   }
+};
+
+// Force a complete app refresh - useful for Lovable.dev environment
+export const forceAppRefresh = () => {
+  console.log("Forcing application refresh...");
+  
+  // Clear any cached connection data
+  clearConnectionTestCache();
+  
+  // Force a complete page reload
+  window.location.reload();
 };
 
 // Clear the connection test cache - useful when refreshing the app
