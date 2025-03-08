@@ -26,7 +26,7 @@ export const MobileMenu = ({ isScrolled, isHomePage }: MobileMenuProps) => {
           <div className="flex items-center justify-between mb-6">
             <Link to="/" className="flex items-center space-x-2">
               <Sailboat className="h-7 w-7 text-primary" />
-              <span className="text-xl font-bold">YachtRent</span>
+              <span className="text-xl font-bold">YachtRentHire</span>
             </Link>
           </div>
           

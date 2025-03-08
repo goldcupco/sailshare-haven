@@ -54,7 +54,7 @@ const Navbar = () => {
                 isScrolled || !isHomePage ? "text-gray-900" : "text-white"
               )}
             >
-              YachtRent
+              YachtRentHire
             </span>
           </Link>
 

@@ -26,7 +26,7 @@ const HowItWorks = () => {
           <div className="container px-4 md:px-6">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-3xl md:text-5xl font-bold mb-6">
-                How YachtRent Works
+                How YachtRentHire Works
               </h1>
               <p className="text-lg text-gray-700 mb-8">
                 Discover how easy it is to book your dream yacht experience or list your vessel with us.
@@ -107,14 +107,14 @@ const HowItWorks = () => {
                 Hear From Our Happy Sailors
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Read what our customers have to say about their experiences with YachtRent.
+                Read what our customers have to say about their experiences with YachtRentHire.
               </p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
                 {
-                  quote: "SailHaven made booking a yacht for our anniversary so easy. The boat was exactly as described and the captain was amazing!",
+                  quote: "YachtRentHire made booking a yacht for our anniversary so easy. The boat was exactly as described and the captain was amazing!",
                   author: "Michael & Sarah",
                   location: "Miami, FL"
                 },
@@ -124,7 +124,7 @@ const HowItWorks = () => {
                   location: "San Diego, CA"
                 },
                 {
-                  quote: "We've used SailHaven three times now and each experience has been fantastic. We'll never use another platform for our sailing adventures.",
+                  quote: "We've used YachtRentHire three times now and each experience has been fantastic. We'll never use another platform for our sailing adventures.",
                   author: "Robert & Jennifer",
                   location: "Newport, RI"
                 }
@@ -157,7 +157,7 @@ const HowItWorks = () => {
                   Trust & Safety Guaranteed
                 </h2>
                 <p className="text-gray-600 mb-8">
-                  At YachtRent, we prioritize your safety and peace of mind. Every yacht in our marketplace undergoes a rigorous verification process, and all transactions are secure.
+                  At YachtRentHire, we prioritize your safety and peace of mind. Every yacht in our marketplace undergoes a rigorous verification process, and all transactions are secure.
                 </p>
                 <div className="space-y-4">
                   {[
@@ -222,7 +222,7 @@ const HowItWorks = () => {
                 Frequently Asked Questions
               </h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
-                Find answers to common questions about booking and renting yachts with YachtRent.
+                Find answers to common questions about booking and renting yachts with YachtRentHire.
               </p>
             </div>
             
