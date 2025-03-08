@@ -3,58 +3,47 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 import { toast } from "@/hooks/use-toast";
 
-// Get the direct values from the config.toml file when available
-const CONFIG_PROJECT_ID = "yxthrrmhtjudhhxlrjig";
+// Project configuration
+const PROJECT_ID = "yxthrrmhtjudhhxlrjig";
+const SUPABASE_URL = `https://${PROJECT_ID}.supabase.co`;
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dGhycm1odGp1ZGhoeGxyamlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NzMzODYsImV4cCI6MjA1NzA0OTM4Nn0.Ks0gxcwIVe4eYRD4DW-Mmy5qQlq-ExB_Nk4nmZQvCXg';
 
-// Build the URL from the project ID or use environment variable
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || `https://${CONFIG_PROJECT_ID}.supabase.co`;
-
-// Use the anon key from environment or use the value from console
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dGhycm1odGp1ZGhoeGxyamlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NzMzODYsImV4cCI6MjA1NzA0OTM4Nn0.Ks0gxcwIVe4eYRD4DW-Mmy5qQlq-ExB_Nk4nmZQvCXg';
-
-// Enhanced environment variable logging - immediately log when the module loads
-console.log("%c🔑 Supabase Connection Details", "background: #3ECF8E; color: white; padding: 2px 5px; border-radius: 3px;", {
-  url: supabaseUrl,
-  keyLength: supabaseAnonKey?.length || 0,
-  configProjectId: CONFIG_PROJECT_ID,
-  timestamp: new Date().toISOString(),
-  isUsingDirectConfig: !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY
+// Log connection details for debugging
+console.info('Initializing Supabase client with:', {
+  url: SUPABASE_URL,
+  keyPresent: !!SUPABASE_ANON_KEY,
+  projectId: PROJECT_ID
 });
 
 // Create supabase client
 export const supabase = createClient<Database>(
-  supabaseUrl,
-  supabaseAnonKey
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
 );
 
-// Cache the connection test result to prevent multiple toasts
+// Cache the connection test result
 let connectionTestResult: boolean | null = null;
 
-// Test the connection and show a toast message
+// Test the connection
 export const testSupabaseConnection = async (forceTest = false) => {
   // Return cached result if available and not forcing a new test
   if (connectionTestResult !== null && !forceTest) {
-    console.log("Using cached connection test result:", connectionTestResult);
     return connectionTestResult;
   }
   
   try {
-    console.log("Testing Supabase connection with:", { 
-      url: supabaseUrl.substring(0, 25) + '...', 
-      keyValid: supabaseAnonKey.length > 20
-    });
+    console.log("Testing Supabase connection...");
     
     // Test connection by making a simple query
-    const { data, error } = await supabase.from('yacht_listings').select('count').limit(1);
+    const { error } = await supabase.from('yacht_listings').select('count').limit(1);
     
     if (error) {
       // Check if this is a "relation does not exist" error - that's okay for a new project
       if (error.message && error.message.includes('relation "yacht_listings" does not exist')) {
-        console.log("Table doesn't exist yet, but connection works");
+        console.log("Database connected (table doesn't exist yet)");
         toast({
           title: "Database Connected",
-          description: "Connected to Supabase, but no tables exist yet. Your database is ready to use!",
-          duration: 5000,
+          description: "Successfully connected to Supabase. Tables will be created as needed.",
         });
         connectionTestResult = true;
         return true;
@@ -63,12 +52,10 @@ export const testSupabaseConnection = async (forceTest = false) => {
       throw error;
     }
     
-    console.log("Database connected successfully:", data);
-    
+    console.log("Database connected successfully");
     toast({
       title: "Database Connected",
       description: "Successfully connected to the Supabase database",
-      duration: 3000,
     });
     
     connectionTestResult = true;
@@ -78,9 +65,8 @@ export const testSupabaseConnection = async (forceTest = false) => {
     
     toast({
       title: "Database Connection Issue",
-      description: error.message || "Could not connect to the database. Check your configuration.",
+      description: error.message || "Could not connect to the database",
       variant: "destructive",
-      duration: 5000,
     });
     
     connectionTestResult = false;
@@ -88,38 +74,24 @@ export const testSupabaseConnection = async (forceTest = false) => {
   }
 };
 
-// Force a complete app refresh - useful for Lovable.dev environment
-export const forceAppRefresh = () => {
-  console.log("Forcing application refresh...");
-  
-  // Clear any cached connection data
-  clearConnectionTestCache();
-  
-  // Force a complete page reload
-  window.location.reload();
-};
-
-// Clear the connection test cache - useful when refreshing the app
+// Clear the connection test cache
 export const clearConnectionTestCache = () => {
   connectionTestResult = null;
 };
 
+// Get the current user
 export const getUser = async () => {
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
-    
-    if (error) {
-      console.error('Error getting user:', error);
-      return null;
-    }
-    
+    if (error) throw error;
     return user;
   } catch (error) {
-    console.error('Unexpected error getting user:', error);
+    console.error('Error getting user:', error);
     return null;
   }
 };
 
+// Check if user is authenticated
 export const isAuthenticated = async () => {
   const user = await getUser();
   return !!user;
