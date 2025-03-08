@@ -2,12 +2,22 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { testSupabaseConnection, clearConnectionTestCache } from "@/lib/supabase";
-import { CheckCircle2, XCircle, DatabaseIcon, Loader2, ExternalLink } from "lucide-react";
+import { testSupabaseConnection, clearConnectionTestCache, supabase } from "@/lib/supabase";
+import { 
+  CheckCircle2, 
+  XCircle, 
+  DatabaseIcon, 
+  Loader2, 
+  ExternalLink, 
+  Table, 
+  RefreshCcw
+} from "lucide-react";
 
 const DatabaseStatusSection = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
+  const [tableCount, setTableCount] = useState<number | null>(null);
+  const [yachtCount, setYachtCount] = useState<number | null>(null);
 
   const checkConnection = async () => {
     if (loading) return;
@@ -16,6 +26,27 @@ const DatabaseStatusSection = () => {
     try {
       const connected = await testSupabaseConnection(true);
       setIsConnected(connected);
+      
+      if (connected) {
+        // Get count of yachts
+        const { count, error } = await supabase
+          .from('yacht_listings')
+          .select('*', { count: 'exact', head: true });
+          
+        if (!error && count !== null) {
+          setYachtCount(count);
+        }
+        
+        // Get table list to count tables
+        const { data: tables } = await supabase
+          .from('pg_tables')
+          .select('schemaname, tablename')
+          .eq('schemaname', 'public');
+          
+        if (tables) {
+          setTableCount(tables.length);
+        }
+      }
     } catch (error) {
       setIsConnected(false);
       console.error("Error checking connection:", error);
@@ -52,6 +83,22 @@ const DatabaseStatusSection = () => {
                 </div>
               </div>
               
+              {isConnected && (
+                <div className="flex items-center gap-4">
+                  {tableCount !== null && (
+                    <div className="flex items-center">
+                      <Table className="h-4 w-4 mr-2 text-primary" />
+                      <span className="text-sm text-gray-600">{tableCount} Tables</span>
+                    </div>
+                  )}
+                  {yachtCount !== null && (
+                    <div className="flex items-center">
+                      <span className="text-sm text-gray-600">{yachtCount} Yachts</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <div className="flex items-center gap-4">
                 {isConnected !== null && (
                   <div className="flex items-center gap-2">
@@ -74,6 +121,7 @@ const DatabaseStatusSection = () => {
                     onClick={checkConnection} 
                     disabled={loading}
                     variant="outline"
+                    size="sm"
                   >
                     {loading ? (
                       <>
@@ -81,13 +129,17 @@ const DatabaseStatusSection = () => {
                         Checking...
                       </>
                     ) : (
-                      "Test Connection"
+                      <>
+                        <RefreshCcw className="h-4 w-4 mr-2" />
+                        Test Connection
+                      </>
                     )}
                   </Button>
                   
                   <Button 
                     onClick={openSupabaseDashboard} 
                     variant="outline"
+                    size="sm"
                     className="flex items-center"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />

@@ -34,7 +34,7 @@ export const testSupabaseConnection = async (forceTest = false) => {
   try {
     console.log("Testing Supabase connection...");
     
-    // Test connection by making a simple query to the newly created table
+    // Test connection by making a simple query to the yacht_listings table
     const { data, error } = await supabase
       .from('yacht_listings')
       .select('count')
@@ -48,7 +48,7 @@ export const testSupabaseConnection = async (forceTest = false) => {
     console.log("Database connected successfully:", data);
     toast({
       title: "Database Connected",
-      description: "Successfully connected to the Supabase database",
+      description: "Successfully connected to the Supabase yacht listings database",
     });
     
     connectionTestResult = true;
