@@ -4,13 +4,9 @@ import type { Database } from './database.types';
 import { toast } from "@/hooks/use-toast";
 
 // Get environment variables with fallbacks
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-// Validate that the required environment variables are set
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase URL or Anon Key is missing. Check your environment variables.');
-}
+// Using default demo credentials if environment variables are not set
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://supabase-demo.example.com';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'demo-anon-key';
 
 // Create supabase client
 export const supabase = createClient<Database>(
@@ -21,6 +17,19 @@ export const supabase = createClient<Database>(
 // Test the connection and show a toast message
 export const testSupabaseConnection = async () => {
   try {
+    // Check if we're using demo credentials
+    if (supabaseUrl === 'https://supabase-demo.example.com') {
+      console.warn("Using demo Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables for production use.");
+      
+      toast({
+        title: "Supabase Configuration Required",
+        description: "Please set your Supabase URL and Anonymous Key in the environment variables.",
+        variant: "destructive",
+      });
+      
+      return false;
+    }
+    
     const { data, error } = await supabase.from('yacht_listings').select('count').limit(1);
     
     if (error) {

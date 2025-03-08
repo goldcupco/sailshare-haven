@@ -3,11 +3,18 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { testSupabaseConnection } from "@/lib/supabase";
-import { CheckCircle2, XCircle, DatabaseIcon, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, DatabaseIcon, Loader2, AlertTriangle } from "lucide-react";
 
 const DatabaseStatusSection = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isDemo, setIsDemo] = useState(false);
+
+  useEffect(() => {
+    // Check if using demo credentials
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    setIsDemo(!supabaseUrl || supabaseUrl === 'https://supabase-demo.example.com');
+  }, []);
 
   const checkConnection = async () => {
     setLoading(true);
@@ -33,17 +40,24 @@ const DatabaseStatusSection = () => {
                 <div>
                   <h3 className="text-lg font-medium">Supabase Connection Status</h3>
                   <p className="text-sm text-gray-500">
-                    {isConnected === null
-                      ? "Check your database connection"
-                      : isConnected
-                      ? "Connected to Supabase database"
-                      : "Not connected to Supabase database"}
+                    {isDemo ? 
+                      "Demo mode - environment variables not set" : 
+                      isConnected === null
+                        ? "Check your database connection"
+                        : isConnected
+                        ? "Connected to Supabase database"
+                        : "Not connected to Supabase database"}
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-4">
-                {isConnected !== null && (
+                {isDemo ? (
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                    <span className="text-amber-600 font-medium">Demo Mode</span>
+                  </div>
+                ) : isConnected !== null && (
                   <div className="flex items-center gap-2">
                     {isConnected ? (
                       <>
@@ -75,6 +89,22 @@ const DatabaseStatusSection = () => {
                 </Button>
               </div>
             </div>
+            
+            {isDemo && (
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+                <h4 className="font-medium text-amber-800 mb-1">Setup Required</h4>
+                <p className="text-sm text-amber-700">
+                  Please set the following environment variables:
+                </p>
+                <ul className="text-sm text-amber-700 list-disc list-inside mt-1">
+                  <li>VITE_SUPABASE_URL - Your Supabase project URL</li>
+                  <li>VITE_SUPABASE_ANON_KEY - Your Supabase anonymous key</li>
+                </ul>
+                <p className="text-sm text-amber-700 mt-2">
+                  Create a new .env file in your project root with these variables.
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
