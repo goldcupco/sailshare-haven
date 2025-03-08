@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { testSupabaseConnection } from "@/lib/supabase";
+import { testSupabaseConnection, clearConnectionTestCache } from "@/lib/supabase";
 import { CheckCircle2, XCircle, DatabaseIcon, Loader2, AlertTriangle, RefreshCw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -17,13 +17,17 @@ const DatabaseStatusSection = () => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
     
-    const hasEnvVars = !!(supabaseUrl && supabaseAnonKey);
-    setIsDemo(!hasEnvVars);
+    // More thorough check - we want to see if they're actual Supabase values
+    const hasValidEnvVars = !!(supabaseUrl && supabaseAnonKey && 
+                           supabaseUrl.includes('supabase.co'));
     
-    console.log("Environment variables check:", { 
+    setIsDemo(!hasValidEnvVars);
+    
+    console.log("Enhanced environment variables check:", { 
       hasUrl: !!supabaseUrl, 
+      urlValid: supabaseUrl?.includes('supabase.co'),
       hasKey: !!supabaseAnonKey,
-      isDemoMode: !hasEnvVars
+      isDemoMode: !hasValidEnvVars
     });
   }, []);
 
@@ -32,7 +36,9 @@ const DatabaseStatusSection = () => {
     
     setLoading(true);
     try {
-      const connected = await testSupabaseConnection();
+      // Force a fresh test by clearing the cache first
+      clearConnectionTestCache();
+      const connected = await testSupabaseConnection(true);
       setIsConnected(connected);
     } catch (error) {
       setIsConnected(false);
@@ -48,6 +54,9 @@ const DatabaseStatusSection = () => {
       description: "Reloading to apply environment variables...",
       duration: 2000,
     });
+    
+    // Clear cache before reload
+    clearConnectionTestCache();
     
     // Force a hard refresh to ensure the browser fetches new env values
     setTimeout(() => {
@@ -67,7 +76,7 @@ const DatabaseStatusSection = () => {
                   <h3 className="text-lg font-medium">Supabase Connection Status</h3>
                   <p className="text-sm text-gray-500">
                     {isDemo ? 
-                      "Environment variables not detected" : 
+                      "Environment variables not detected or invalid" : 
                       isConnected === null
                         ? "Check your database connection"
                         : isConnected
@@ -126,9 +135,9 @@ const DatabaseStatusSection = () => {
                 >
                   <XCircle className="h-4 w-4" />
                 </button>
-                <h4 className="font-medium text-amber-800 mb-1">Environment Variables Not Detected</h4>
+                <h4 className="font-medium text-amber-800 mb-1">Invalid or Missing Environment Variables</h4>
                 <p className="text-sm text-amber-700 mb-3">
-                  If you've already created an .env file, you need to restart your development server.
+                  The environment variables are either missing or not being correctly loaded.
                 </p>
                 <div className="mb-3">
                   <Button 
@@ -142,11 +151,13 @@ const DatabaseStatusSection = () => {
                   </Button>
                 </div>
                 <p className="text-sm text-amber-700">
-                  Your .env file should be in the project root with these variables:
+                  Tips for troubleshooting:
                 </p>
                 <ul className="text-sm text-amber-700 list-disc list-inside mt-1">
-                  <li>VITE_SUPABASE_URL - Your Supabase project URL</li>
-                  <li>VITE_SUPABASE_ANON_KEY - Your Supabase anonymous key</li>
+                  <li>Verify .env file is in the project root (not in src folder)</li>
+                  <li>Environment variables must start with VITE_</li>
+                  <li>Restart the dev server after changing .env file</li>
+                  <li>Check for typos in variable names</li>
                 </ul>
               </div>
             )}

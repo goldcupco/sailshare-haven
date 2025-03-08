@@ -7,12 +7,15 @@ import LocationSection from "@/components/home/LocationSection";
 import DatabaseStatusSection from "@/components/home/DatabaseStatusSection";
 import Footer from "@/components/shared/Footer";
 import { Toaster } from "@/components/ui/toaster";
-import { testSupabaseConnection } from "@/lib/supabase";
+import { testSupabaseConnection, clearConnectionTestCache } from "@/lib/supabase";
 
 const Index = () => {
   const [hasTestedConnection, setHasTestedConnection] = useState(false);
 
   useEffect(() => {
+    // Clear the connection test cache on component mount
+    clearConnectionTestCache();
+    
     // Only test connection once to avoid toast pileups
     if (hasTestedConnection) return;
     
