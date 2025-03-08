@@ -8,7 +8,8 @@ import { Rating } from "@/components/ui/rating";
 import { Heart, MapPin, Users, Ruler, Sailboat, Calendar } from "lucide-react";
 import { Yacht } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
 
 interface YachtCardProps {
   yacht: Yacht;
@@ -28,14 +29,19 @@ const YachtCard = ({ yacht, className, size = "md" }: YachtCardProps) => {
       const favorites = JSON.parse(favoritesStr);
       setFavorited(favorites.some((fav: any) => fav.id === yacht.id));
     }
+    
+    // Log yacht data to debug
+    console.log("Yacht data:", yacht);
   }, [yacht.id]);
   
-  const toggleFavorite = (e: React.MouseEvent) => {
+  const toggleFavorite = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    if (!isLoggedIn) {
+    // Check authentication with Supabase
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
       toast({
         title: "Login Required",
         description: "Please log in to save favorites.",
@@ -101,13 +107,18 @@ const YachtCard = ({ yacht, className, size = "md" }: YachtCardProps) => {
       >
         <div className={cn("relative overflow-hidden", imageHeightClasses[size])}>
           <img
-            src={yacht.imageUrl}
+            src={yacht.imageUrl || "/placeholder.svg"}
             alt={yacht.name}
             className={cn(
               "w-full h-full object-cover transition-all duration-500 hover:scale-105 image-fade-in",
               imageLoaded ? "loaded" : ""
             )}
             onLoad={() => setImageLoaded(true)}
+            onError={(e) => {
+              // Fallback to placeholder if image fails to load
+              (e.target as HTMLImageElement).src = "/placeholder.svg";
+              setImageLoaded(true);
+            }}
           />
           <Button
             size="icon"
@@ -135,12 +146,12 @@ const YachtCard = ({ yacht, className, size = "md" }: YachtCardProps) => {
               <h3 className="font-medium text-lg line-clamp-1">{yacht.name}</h3>
               <div className="flex items-center text-sm text-gray-500 mt-1">
                 <MapPin className="h-3.5 w-3.5 mr-1" />
-                <span>{yacht.location.city}, {yacht.location.state}</span>
+                <span>{yacht.location?.city || "Unknown"}, {yacht.location?.state || "Location"}</span>
               </div>
             </div>
             <div className="flex items-center">
-              <Rating value={yacht.rating} size="sm" />
-              <span className="text-sm text-gray-500 ml-1">({yacht.reviewCount})</span>
+              <Rating value={yacht.rating || 0} size="sm" />
+              <span className="text-sm text-gray-500 ml-1">({yacht.reviewCount || 0})</span>
             </div>
           </div>
           
