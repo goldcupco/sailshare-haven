@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 import { toast } from "@/hooks/use-toast";
@@ -23,6 +24,7 @@ export const testSupabaseConnection = async () => {
         title: "Environment Variables Not Applied",
         description: "If you've created an .env file, you may need to refresh the project or restart the server for changes to take effect.",
         variant: "destructive",
+        duration: 5000,
       });
       
       return false;
@@ -39,6 +41,7 @@ export const testSupabaseConnection = async () => {
     toast({
       title: "Database Connected",
       description: "Successfully connected to the Supabase database",
+      duration: 3000,
     });
     
     return true;
@@ -49,6 +52,7 @@ export const testSupabaseConnection = async () => {
       title: "Database Connection Failed",
       description: error.message || "Could not connect to the database. Check your configuration.",
       variant: "destructive",
+      duration: 5000,
     });
     
     return false;

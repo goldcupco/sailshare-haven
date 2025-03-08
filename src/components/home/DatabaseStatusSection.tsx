@@ -9,6 +9,7 @@ const DatabaseStatusSection = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
+  const [showWarning, setShowWarning] = useState(true);
 
   useEffect(() => {
     // Check if using demo credentials
@@ -31,6 +32,10 @@ const DatabaseStatusSection = () => {
 
   const handleRefresh = () => {
     window.location.reload();
+  };
+
+  const closeWarning = () => {
+    setShowWarning(false);
   };
 
   return (
@@ -94,8 +99,17 @@ const DatabaseStatusSection = () => {
               </div>
             </div>
             
-            {isDemo && (
-              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+            {isDemo && showWarning && (
+              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md relative">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-amber-100"
+                  onClick={closeWarning}
+                >
+                  <XCircle className="h-4 w-4 text-amber-600" />
+                  <span className="sr-only">Close</span>
+                </Button>
                 <h4 className="font-medium text-amber-800 mb-1">Environment Not Detected</h4>
                 <p className="text-sm text-amber-700">
                   If you've already created an .env file, try refreshing the application:
