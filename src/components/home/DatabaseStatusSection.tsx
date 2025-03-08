@@ -10,7 +10,8 @@ import {
   Loader2, 
   ExternalLink, 
   Table, 
-  RefreshCcw
+  RefreshCcw,
+  FileText
 } from "lucide-react";
 
 const DatabaseStatusSection = () => {
@@ -58,6 +59,10 @@ const DatabaseStatusSection = () => {
   const openSupabaseDashboard = () => {
     window.open("https://supabase.com/dashboard/project/yxthrrmhtjudhhxlrjig", "_blank");
   };
+  
+  const viewSqlScripts = () => {
+    window.open("https://github.com/your-repo/your-project/tree/main/src/sql", "_blank");
+  };
 
   useEffect(() => {
     checkConnection();
@@ -79,6 +84,9 @@ const DatabaseStatusSection = () => {
                       : isConnected
                       ? "Connected to Supabase database"
                       : "Not connected to Supabase database"}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    SQL Scripts stored in <code className="bg-gray-100 px-1 rounded">src/sql/</code> directory
                   </p>
                 </div>
               </div>
@@ -144,6 +152,16 @@ const DatabaseStatusSection = () => {
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
                     Dashboard
+                  </Button>
+                  
+                  <Button 
+                    onClick={viewSqlScripts} 
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    SQL Scripts
                   </Button>
                 </div>
               </div>

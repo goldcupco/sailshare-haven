@@ -89,3 +89,11 @@ export const isAuthenticated = async () => {
   const user = await getUser();
   return !!user;
 };
+
+/**
+ * SQL Scripts Documentation
+ * ------------------------
+ * The SQL scripts used to set up the database are stored in:
+ * - src/sql/create_tables.sql: Contains DDL to create tables and views
+ * - src/sql/sample_data.sql: Contains DML to populate the tables with sample data
+ */
