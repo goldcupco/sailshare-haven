@@ -5,14 +5,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { 
   testSupabaseConnection, 
   clearConnectionTestCache, 
-  forceAppRefresh 
+  forceAppRefresh,
+  supabase
 } from "@/lib/supabase";
 import { 
   CheckCircle2, 
   XCircle, 
   DatabaseIcon, 
   Loader2, 
-  AlertTriangle, 
+  InfoIcon,
   RefreshCw,
   X
 } from "lucide-react";
@@ -21,31 +22,11 @@ import { toast } from "@/hooks/use-toast";
 const DatabaseStatusSection = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
-  const [isDemo, setIsDemo] = useState(false);
-  const [showWarning, setShowWarning] = useState(true);
+  const [showInfo, setShowInfo] = useState(true);
 
   useEffect(() => {
-    // Check if environment variables are present
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    
-    // More thorough check - we want to see if they're actual Supabase values
-    const hasValidEnvVars = !!(supabaseUrl && supabaseAnonKey && 
-                           supabaseUrl.includes('supabase.co') &&
-                           supabaseAnonKey.length > 20);
-    
-    setIsDemo(!hasValidEnvVars);
-    
-    // Log detailed diagnostics to help debug environment variable issues
-    console.log("Environment variables diagnostic check:", { 
-      hasUrl: !!supabaseUrl, 
-      urlLength: supabaseUrl?.length || 0,
-      urlValid: supabaseUrl?.includes('supabase.co') || false,
-      hasKey: !!supabaseAnonKey,
-      keyLength: supabaseAnonKey?.length || 0,
-      isValidConfig: hasValidEnvVars,
-      timestamp: new Date().toISOString()
-    });
+    // Check immediately on component mount
+    checkConnection();
   }, []);
 
   const checkConnection = async () => {
@@ -68,12 +49,16 @@ const DatabaseStatusSection = () => {
   const handleForceRefresh = () => {
     toast({
       title: "Force Refreshing Application",
-      description: "Reloading to apply environment variables in Lovable.dev...",
+      description: "Reloading to apply latest configuration...",
       duration: 3000,
     });
     
-    // Use the new forceAppRefresh function
     forceAppRefresh();
+  };
+
+  // Get the current URL for Supabase dashboard link
+  const getSupabaseDashboardUrl = () => {
+    return `https://supabase.com/dashboard/project/yxthrrmhtjudhhxlrjig`;
   };
 
   return (
@@ -87,24 +72,17 @@ const DatabaseStatusSection = () => {
                 <div>
                   <h3 className="text-lg font-medium">Supabase Connection Status</h3>
                   <p className="text-sm text-gray-500">
-                    {isDemo ? 
-                      "Environment variables not detected or invalid" : 
-                      isConnected === null
-                        ? "Check your database connection"
-                        : isConnected
-                        ? "Connected to Supabase database"
-                        : "Not connected to Supabase database"}
+                    {isConnected === null
+                      ? "Checking database connection..."
+                      : isConnected
+                      ? "Connected to Supabase database"
+                      : "Not connected to Supabase database"}
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-4">
-                {isDemo ? (
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-amber-500" />
-                    <span className="text-amber-600 font-medium">Config Needed</span>
-                  </div>
-                ) : isConnected !== null && (
+                {isConnected !== null && (
                   <div className="flex items-center gap-2">
                     {isConnected ? (
                       <>
@@ -137,40 +115,49 @@ const DatabaseStatusSection = () => {
               </div>
             </div>
             
-            {isDemo && showWarning && (
-              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md relative">
+            {!isConnected && showInfo && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md relative">
                 <button 
                   type="button"
-                  className="absolute top-2 right-2 h-6 w-6 p-0 flex items-center justify-center text-amber-600 hover:bg-amber-100 rounded-full"
-                  onClick={() => setShowWarning(false)}
-                  aria-label="Close warning"
+                  className="absolute top-2 right-2 h-6 w-6 p-0 flex items-center justify-center text-blue-600 hover:bg-blue-100 rounded-full"
+                  onClick={() => setShowInfo(false)}
+                  aria-label="Close info"
                 >
                   <X className="h-4 w-4" />
                 </button>
-                <h4 className="font-medium text-amber-800 mb-1">Environment Variables in Lovable.dev</h4>
-                <p className="text-sm text-amber-700 mb-3">
-                  Environment variables may not be correctly loaded in the Lovable.dev environment.
+                <h4 className="font-medium text-blue-800 flex items-center mb-1">
+                  <InfoIcon className="h-4 w-4 mr-1" />
+                  Supabase Connection Information
+                </h4>
+                <p className="text-sm text-blue-700 mb-3">
+                  Your app is now connected to Supabase project: <strong>yxthrrmhtjudhhxlrjig</strong>
                 </p>
-                <div className="mb-3">
+                
+                <div className="flex flex-wrap gap-2 mb-3">
                   <Button 
                     variant="secondary" 
                     size="sm" 
-                    className="bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200"
+                    className="bg-blue-100 border border-blue-300 text-blue-800 hover:bg-blue-200"
                     onClick={handleForceRefresh}
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
-                    Force App Refresh
+                    Refresh App
+                  </Button>
+                  
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="bg-blue-100 border border-blue-300 text-blue-800 hover:bg-blue-200"
+                    onClick={() => window.open(getSupabaseDashboardUrl(), '_blank')}
+                  >
+                    <DatabaseIcon className="h-4 w-4 mr-2" />
+                    Open Supabase Dashboard
                   </Button>
                 </div>
-                <p className="text-sm text-amber-700">
-                  Tips for Lovable.dev environment:
+                
+                <p className="text-sm text-blue-700">
+                  To create tables in your Supabase database, you can use the SQL editor in the Supabase dashboard.
                 </p>
-                <ul className="text-sm text-amber-700 list-disc list-inside mt-1">
-                  <li>Variables should be properly set in your project settings</li>
-                  <li>Use the Force App Refresh button to reload with variables</li>
-                  <li>Check console logs for detailed diagnostics</li>
-                  <li>Make sure variable names begin with VITE_</li>
-                </ul>
               </div>
             )}
           </CardContent>

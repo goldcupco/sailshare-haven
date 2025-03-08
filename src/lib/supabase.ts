@@ -3,28 +3,28 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 import { toast } from "@/hooks/use-toast";
 
-// Get environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Get the direct values from the config.toml file when available
+const CONFIG_PROJECT_ID = "yxthrrmhtjudhhxlrjig";
+
+// Build the URL from the project ID or use environment variable
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || `https://${CONFIG_PROJECT_ID}.supabase.co`;
+
+// Use the anon key from environment or use the value from console
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl4dGhycm1odGp1ZGhoeGxyamlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE0NzMzODYsImV4cCI6MjA1NzA0OTM4Nn0.Ks0gxcwIVe4eYRD4DW-Mmy5qQlq-ExB_Nk4nmZQvCXg';
 
 // Enhanced environment variable logging - immediately log when the module loads
-console.log("%c🔑 Supabase Environment Check", "background: #3ECF8E; color: white; padding: 2px 5px; border-radius: 3px;", {
-  urlDetected: !!supabaseUrl,
-  urlValid: supabaseUrl?.includes('supabase.co'),
-  urlLength: supabaseUrl?.length || 0,
-  keyDetected: !!supabaseAnonKey,
+console.log("%c🔑 Supabase Connection Details", "background: #3ECF8E; color: white; padding: 2px 5px; border-radius: 3px;", {
+  url: supabaseUrl,
   keyLength: supabaseAnonKey?.length || 0,
+  configProjectId: CONFIG_PROJECT_ID,
   timestamp: new Date().toISOString(),
+  isUsingDirectConfig: !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY
 });
-
-// Create the final variables based on environment availability
-const finalSupabaseUrl = supabaseUrl || 'https://supabase-demo.example.com';
-const finalSupabaseAnonKey = supabaseAnonKey || 'demo-anon-key';
 
 // Create supabase client
 export const supabase = createClient<Database>(
-  finalSupabaseUrl,
-  finalSupabaseAnonKey
+  supabaseUrl,
+  supabaseAnonKey
 );
 
 // Cache the connection test result to prevent multiple toasts
@@ -39,33 +39,8 @@ export const testSupabaseConnection = async (forceTest = false) => {
   }
   
   try {
-    // Enhanced check for valid environment variables
-    const hasValidEnvVars = !!supabaseUrl && !!supabaseAnonKey && 
-                          supabaseUrl.includes('supabase.co') && 
-                          supabaseAnonKey.length > 20;
-    
-    if (!hasValidEnvVars) {
-      console.warn("Using demo Supabase credentials or invalid configuration detected.", {
-        urlPresent: !!supabaseUrl,
-        urlValid: supabaseUrl?.includes('supabase.co'),
-        keyPresent: !!supabaseAnonKey,
-        keyValidLength: supabaseAnonKey?.length > 20
-      });
-      
-      toast({
-        title: "Environment Variables Issue",
-        description: "Supabase configuration issue detected. In Lovable.dev, try forcing a refresh using the button below.",
-        variant: "destructive",
-        duration: 6000,
-      });
-      
-      connectionTestResult = false;
-      return false;
-    }
-    
-    // If we get here, environment variables are applied
-    console.log("Using Supabase configuration:", { 
-      url: supabaseUrl.substring(0, 15) + '...', // Log partial URL for security
+    console.log("Testing Supabase connection with:", { 
+      url: supabaseUrl.substring(0, 25) + '...', 
       keyValid: supabaseAnonKey.length > 20
     });
     
@@ -73,6 +48,18 @@ export const testSupabaseConnection = async (forceTest = false) => {
     const { data, error } = await supabase.from('yacht_listings').select('count').limit(1);
     
     if (error) {
+      // Check if this is a "relation does not exist" error - that's okay for a new project
+      if (error.message && error.message.includes('relation "yacht_listings" does not exist')) {
+        console.log("Table doesn't exist yet, but connection works");
+        toast({
+          title: "Database Connected",
+          description: "Connected to Supabase, but no tables exist yet. Your database is ready to use!",
+          duration: 5000,
+        });
+        connectionTestResult = true;
+        return true;
+      }
+      
       throw error;
     }
     
@@ -90,7 +77,7 @@ export const testSupabaseConnection = async (forceTest = false) => {
     console.error('Supabase connection error:', error);
     
     toast({
-      title: "Database Connection Error",
+      title: "Database Connection Issue",
       description: error.message || "Could not connect to the database. Check your configuration.",
       variant: "destructive",
       duration: 5000,
