@@ -13,14 +13,23 @@ const DatabaseStatusSection = () => {
   const [showWarning, setShowWarning] = useState(true);
 
   useEffect(() => {
-    // Check if using demo credentials by checking if environment variables exist
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    // Check if environment variables are present
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
     
-    setIsDemo(!(supabaseUrl && supabaseAnonKey));
+    const hasEnvVars = !!(supabaseUrl && supabaseAnonKey);
+    setIsDemo(!hasEnvVars);
+    
+    console.log("Environment variables check:", { 
+      hasUrl: !!supabaseUrl, 
+      hasKey: !!supabaseAnonKey,
+      isDemoMode: !hasEnvVars
+    });
   }, []);
 
   const checkConnection = async () => {
+    if (loading) return;
+    
     setLoading(true);
     try {
       const connected = await testSupabaseConnection();
@@ -41,11 +50,9 @@ const DatabaseStatusSection = () => {
     });
     
     // Force a hard refresh to ensure the browser fetches new env values
-    window.location.href = window.location.pathname + '?refresh=' + Date.now();
-  };
-
-  const closeWarning = () => {
-    setShowWarning(false);
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   return (
@@ -111,20 +118,17 @@ const DatabaseStatusSection = () => {
             
             {isDemo && showWarning && (
               <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md relative">
-                <Button 
+                <button 
                   type="button"
-                  variant="ghost" 
-                  size="sm" 
-                  className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-amber-100"
-                  onClick={closeWarning}
+                  className="absolute top-2 right-2 h-6 w-6 p-0 flex items-center justify-center text-amber-600 hover:bg-amber-100 rounded-full"
+                  onClick={() => setShowWarning(false)}
                   aria-label="Close warning"
                 >
-                  <XCircle className="h-4 w-4 text-amber-600" />
-                  <span className="sr-only">Close</span>
-                </Button>
-                <h4 className="font-medium text-amber-800 mb-1">Environment Not Detected</h4>
+                  <XCircle className="h-4 w-4" />
+                </button>
+                <h4 className="font-medium text-amber-800 mb-1">Environment Variables Not Detected</h4>
                 <p className="text-sm text-amber-700 mb-3">
-                  If you've already created an .env file, you need to restart your development server:
+                  If you've already created an .env file, you need to restart your development server.
                 </p>
                 <div className="mb-3">
                   <Button 
@@ -137,7 +141,7 @@ const DatabaseStatusSection = () => {
                     Refresh Application
                   </Button>
                 </div>
-                <p className="text-sm text-amber-700 mt-3">
+                <p className="text-sm text-amber-700">
                   Your .env file should be in the project root with these variables:
                 </p>
                 <ul className="text-sm text-amber-700 list-disc list-inside mt-1">

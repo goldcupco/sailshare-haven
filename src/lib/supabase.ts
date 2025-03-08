@@ -3,14 +3,15 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './database.types';
 import { toast } from "@/hooks/use-toast";
 
-// Get environment variables with fallbacks
+// Get environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-// Check if we have valid environment variables
-const hasValidEnvVars = supabaseUrl.length > 0 && supabaseAnonKey.length > 0;
+// Improved check for valid environment variables
+const hasValidEnvVars = supabaseUrl && supabaseUrl.length > 0 && 
+                      supabaseAnonKey && supabaseAnonKey.length > 0;
 
-// Use demo values only if environment variables are not found
+// Create the final variables based on environment availability
 const finalSupabaseUrl = hasValidEnvVars ? supabaseUrl : 'https://supabase-demo.example.com';
 const finalSupabaseAnonKey = hasValidEnvVars ? supabaseAnonKey : 'demo-anon-key';
 
@@ -28,8 +29,8 @@ export const testSupabaseConnection = async () => {
       console.warn("Using demo Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables for production use.");
       
       toast({
-        title: "Environment Variables Not Applied",
-        description: "Make sure you've saved your .env file in the project root and restarted the development server.",
+        title: "Environment Variables Not Detected",
+        description: "Restart your development server to apply environment variables.",
         variant: "destructive",
         duration: 5000,
       });
@@ -37,6 +38,13 @@ export const testSupabaseConnection = async () => {
       return false;
     }
     
+    // If we get here, environment variables are applied
+    console.log("Using Supabase configuration:", { 
+      url: supabaseUrl.substring(0, 15) + '...', // Log partial URL for security
+      hasKey: !!supabaseAnonKey
+    });
+    
+    // Test connection by making a simple query
     const { data, error } = await supabase.from('yacht_listings').select('count').limit(1);
     
     if (error) {
@@ -56,7 +64,7 @@ export const testSupabaseConnection = async () => {
     console.error('Supabase connection error:', error);
     
     toast({
-      title: "Database Connection Failed",
+      title: "Database Connection Error",
       description: error.message || "Could not connect to the database. Check your configuration.",
       variant: "destructive",
       duration: 5000,

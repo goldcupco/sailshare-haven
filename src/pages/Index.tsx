@@ -16,16 +16,19 @@ const Index = () => {
     // Only test connection once to avoid toast pileups
     if (hasTestedConnection) return;
     
-    // Test Supabase connection with a slight delay
+    // Test Supabase connection with a slight delay to allow UI to render first
     const timer = setTimeout(() => {
       testSupabaseConnection()
+        .then(connected => {
+          console.log("Connection test completed:", connected ? "Success" : "Failed");
+        })
         .catch(error => {
           console.error("Failed to test Supabase connection:", error);
         })
         .finally(() => {
           setHasTestedConnection(true);
         });
-    }, 1000);
+    }, 1500);
     
     return () => clearTimeout(timer);
   }, [hasTestedConnection]);

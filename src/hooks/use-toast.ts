@@ -13,10 +13,12 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement;
 };
 
-const TOAST_LIMIT = 20;
-const TOAST_REMOVE_DELAY = 3000; // Reduced from 1000000 to 3000ms (3 seconds)
+const TOAST_LIMIT = 5; // Reduced from 20 to 5 to prevent stacking
+const TOAST_REMOVE_DELAY = 3000; // 3 seconds default removal time
 
-type ToastOptions = Omit<ToasterToast, "id">;
+type ToastOptions = Omit<ToasterToast, "id"> & {
+  duration?: number; // Allow custom duration
+};
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -147,7 +149,10 @@ function useToast() {
 
 function toast(props: ToastOptions) {
   const id = generateId();
-
+  
+  // Set auto-dismiss timeout
+  const duration = props.duration || TOAST_REMOVE_DELAY;
+  
   const update = (props: ToastOptions) =>
     dispatch({
       type: actionTypes.UPDATE_TOAST,
@@ -167,6 +172,11 @@ function toast(props: ToastOptions) {
       },
     },
   });
+  
+  // Auto-dismiss after duration
+  if (duration !== Infinity) {
+    setTimeout(dismiss, duration);
+  }
 
   return {
     id: id,
