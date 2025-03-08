@@ -4,26 +4,32 @@ import type { Database } from './database.types';
 import { toast } from "@/hooks/use-toast";
 
 // Get environment variables with fallbacks
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://supabase-demo.example.com';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'demo-anon-key';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+// Check if we have valid environment variables
+const hasValidEnvVars = supabaseUrl.length > 0 && supabaseAnonKey.length > 0;
+
+// Use demo values only if environment variables are not found
+const finalSupabaseUrl = hasValidEnvVars ? supabaseUrl : 'https://supabase-demo.example.com';
+const finalSupabaseAnonKey = hasValidEnvVars ? supabaseAnonKey : 'demo-anon-key';
 
 // Create supabase client
 export const supabase = createClient<Database>(
-  supabaseUrl,
-  supabaseAnonKey
+  finalSupabaseUrl,
+  finalSupabaseAnonKey
 );
 
 // Test the connection and show a toast message
 export const testSupabaseConnection = async () => {
   try {
     // Check if we're using demo credentials
-    if (supabaseUrl === 'https://supabase-demo.example.com') {
+    if (!hasValidEnvVars) {
       console.warn("Using demo Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables for production use.");
       
-      // Show a toast notification that will auto-dismiss after 5 seconds
       toast({
         title: "Environment Variables Not Applied",
-        description: "If you've created an .env file, you may need to refresh the project or restart the server for changes to take effect.",
+        description: "Make sure you've saved your .env file in the project root and restarted the development server.",
         variant: "destructive",
         duration: 5000,
       });
@@ -39,7 +45,6 @@ export const testSupabaseConnection = async () => {
     
     console.log("Database connected successfully:", data);
     
-    // Show a toast notification that will auto-dismiss after 3 seconds
     toast({
       title: "Database Connected",
       description: "Successfully connected to the Supabase database",
@@ -50,7 +55,6 @@ export const testSupabaseConnection = async () => {
   } catch (error: any) {
     console.error('Supabase connection error:', error);
     
-    // Show a toast notification that will auto-dismiss after 5 seconds
     toast({
       title: "Database Connection Failed",
       description: error.message || "Could not connect to the database. Check your configuration.",

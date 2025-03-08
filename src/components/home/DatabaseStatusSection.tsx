@@ -13,9 +13,11 @@ const DatabaseStatusSection = () => {
   const [showWarning, setShowWarning] = useState(true);
 
   useEffect(() => {
-    // Check if using demo credentials
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    setIsDemo(!supabaseUrl || supabaseUrl === 'https://supabase-demo.example.com');
+    // Check if using demo credentials by checking if environment variables exist
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+    
+    setIsDemo(!(supabaseUrl && supabaseAnonKey));
   }, []);
 
   const checkConnection = async () => {
@@ -32,17 +34,14 @@ const DatabaseStatusSection = () => {
   };
 
   const handleRefresh = () => {
-    // Show toast to indicate refresh is happening
     toast({
       title: "Refreshing Application",
       description: "Reloading to apply environment variables...",
       duration: 2000,
     });
     
-    // Add a slight delay before refreshing to allow the toast to be seen
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
+    // Force a hard refresh to ensure the browser fetches new env values
+    window.location.href = window.location.pathname + '?refresh=' + Date.now();
   };
 
   const closeWarning = () => {
@@ -113,6 +112,7 @@ const DatabaseStatusSection = () => {
             {isDemo && showWarning && (
               <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md relative">
                 <Button 
+                  type="button"
                   variant="ghost" 
                   size="sm" 
                   className="absolute top-2 right-2 h-6 w-6 p-0 hover:bg-amber-100"
@@ -123,14 +123,14 @@ const DatabaseStatusSection = () => {
                   <span className="sr-only">Close</span>
                 </Button>
                 <h4 className="font-medium text-amber-800 mb-1">Environment Not Detected</h4>
-                <p className="text-sm text-amber-700">
-                  If you've already created an .env file, try refreshing the application:
+                <p className="text-sm text-amber-700 mb-3">
+                  If you've already created an .env file, you need to restart your development server:
                 </p>
-                <div className="mt-2">
+                <div className="mb-3">
                   <Button 
                     variant="secondary" 
                     size="sm" 
-                    className="bg-amber-100 border-amber-300 text-amber-800 hover:bg-amber-200"
+                    className="bg-amber-100 border border-amber-300 text-amber-800 hover:bg-amber-200"
                     onClick={handleRefresh}
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
